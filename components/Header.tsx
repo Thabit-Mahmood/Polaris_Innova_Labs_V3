@@ -39,12 +39,10 @@ export default function Header() {
           <div className="absolute right-0">
             <Link href="/" className="flex items-center space-x-3 space-x-reverse group">
               <div className="relative w-12 h-12 rounded-lg overflow-hidden">
-                <Image
+                <img
                   src="/logo.jpg"
                   alt="Polaris Innova Labs"
-                  fill
-                  className="object-cover"
-                  priority
+                  className="w-full h-full object-cover"
                 />
               </div>
               <div className="hidden sm:flex flex-col">

@@ -40,7 +40,7 @@ export default function WhatsAppButton() {
       {/* Tooltip */}
       {showTooltip && (
         <div className="absolute bottom-full left-0 mb-4 animate-slide-up">
-          <div className="bg-white text-dark-400 px-4 py-3 rounded-lg shadow-xl relative max-w-xs">
+          <div className="bg-white text-dark-400 px-6 py-4 rounded-lg shadow-xl relative min-w-[280px] max-w-md">
             <button
               onClick={() => setShowTooltip(false)}
               className="absolute top-1 left-1 text-gray-500 hover:text-gray-700"
@@ -48,7 +48,7 @@ export default function WhatsAppButton() {
             >
               <FaTimes className="text-sm" />
             </button>
-            <p className="font-tajawal text-sm pr-6">
+            <p className="font-tajawal text-base pr-6">
               هل لديك أسئلة؟ تواصل معنا عبر واتساب! 👋
             </p>
             <div className="absolute -bottom-2 left-6 w-4 h-4 bg-white transform rotate-45"></div>

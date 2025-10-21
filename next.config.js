@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
   output: 'export',
-  basePath: '/Polaris_Innova_Labs_V3',
+  basePath: isProd ? '/Polaris_Innova_Labs_V3' : '',
   reactStrictMode: true,
   swcMinify: true,
   images: {

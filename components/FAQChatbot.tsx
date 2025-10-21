@@ -175,14 +175,14 @@ export default function FAQChatbot() {
           </div>
 
           {/* Contact CTA - Wider */}
-          <div className="mt-12 glass rounded-2xl p-10 text-center border-primary/20 max-w-3xl mx-auto">
-            <p className="text-2xl text-white font-cairo font-bold mb-4">
+          <div className="mt-12 glass rounded-2xl p-12 text-center border-primary/20 max-w-4xl mx-auto">
+            <p className="text-3xl text-white font-cairo font-bold mb-6">
               هل لديك أسئلة؟ تواصل معنا عبر واتساب! 👋
             </p>
-            <p className="text-gray-400 font-tajawal mb-6">
+            <p className="text-lg text-gray-400 font-tajawal mb-8">
               فريقنا جاهز للرد على استفساراتك في أي وقت
             </p>
-            <a href="https://wa.me/966500000000" target="_blank" rel="noopener noreferrer" className="btn-primary inline-block">
+            <a href="https://wa.me/966500000000" target="_blank" rel="noopener noreferrer" className="btn-primary inline-block text-lg px-8 py-4">
               تواصل معنا الآن عبر واتساب
             </a>
           </div>
