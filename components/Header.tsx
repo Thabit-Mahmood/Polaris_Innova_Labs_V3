@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaBars, FaTimes, FaWhatsapp } from 'react-icons/fa';
+import { getAssetPath } from '@/lib/basePath';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -35,12 +36,12 @@ export default function Header() {
     >
       <nav className="container-custom">
         <div className="flex items-center justify-center h-20 relative">
-          {/* Logo - Left Side */}
+          {/* Logo - Right Side */}
           <div className="absolute right-0">
             <Link href="/" className="flex items-center space-x-3 space-x-reverse group">
               <div className="relative w-12 h-12 rounded-lg overflow-hidden">
                 <img
-                  src="/logo.jpg"
+                  src={getAssetPath('/logo.jpg')}
                   alt="Polaris Innova Labs"
                   className="w-full h-full object-cover"
                 />

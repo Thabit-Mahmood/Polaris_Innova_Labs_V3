@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaWhatsapp, FaEnvelope, FaPhone, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { getAssetPath } from '@/lib/basePath';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -30,7 +31,7 @@ export default function Footer() {
             <div className="flex items-center space-x-3 space-x-reverse">
               <div className="relative w-12 h-12 rounded-lg overflow-hidden">
                 <img
-                  src="/logo.jpg"
+                  src={getAssetPath('/logo.jpg')}
                   alt="Polaris Innova Labs"
                   className="w-full h-full object-cover"
                 />
