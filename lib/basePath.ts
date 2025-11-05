@@ -1,6 +1,6 @@
-// Base path for GitHub Pages deployment
-export const basePath = process.env.NODE_ENV === 'production' ? '/Polaris_Innova_Labs_V3' : '';
+// No base path needed for Railway deployment
+export const basePath = '';
 
 export const getAssetPath = (path: string) => {
-  return `${basePath}${path}`;
+  return path;
 };
