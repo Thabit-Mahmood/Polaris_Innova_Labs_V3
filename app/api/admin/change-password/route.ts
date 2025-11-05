@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, readFile } from 'fs/promises';
 import path from 'path';
-
-// Import verification codes from request-password-change
-const verificationCodes = new Map<string, { code: string; expires: number }>();
+import { getVerificationCode, deleteVerificationCode } from '@/lib/verification-codes';
 
 export async function POST(request: NextRequest) {
   try {
     const { code, newPassword } = await request.json();
     const email = 'services@polaris-innova-labs.com';
 
-    const stored = verificationCodes.get(email);
+    const stored = getVerificationCode(email);
 
     if (!stored) {
       return NextResponse.json({ error: 'لم يتم طلب رمز تحقق' }, { status: 400 });
     }
 
     if (Date.now() > stored.expires) {
-      verificationCodes.delete(email);
+      deleteVerificationCode(email);
       return NextResponse.json({ error: 'انتهت صلاحية الرمز' }, { status: 400 });
     }
 
@@ -39,7 +37,7 @@ export async function POST(request: NextRequest) {
     await writeFile(envPath, envContent);
 
     // Clear verification code
-    verificationCodes.delete(email);
+    deleteVerificationCode(email);
 
     return NextResponse.json({ success: true, message: 'تم تغيير كلمة المرور بنجاح' });
   } catch (error) {

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
-export default function UnsubscribePage() {
+function UnsubscribeForm() {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get('email');
   
@@ -89,5 +89,19 @@ export default function UnsubscribePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function UnsubscribePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4">
+        <div className="glass rounded-2xl p-8 max-w-md w-full text-center">
+          <p className="text-white font-tajawal">جاري التحميل...</p>
+        </div>
+      </div>
+    }>
+      <UnsubscribeForm />
+    </Suspense>
   );
 }

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-
-// Store verification codes temporarily (in production, use Redis or database)
-const verificationCodes = new Map<string, { code: string; expires: number }>();
+import { setVerificationCode } from '@/lib/verification-codes';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -22,7 +20,7 @@ export async function POST() {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = Date.now() + 15 * 60 * 1000; // 15 minutes
 
-    verificationCodes.set(email, { code, expires });
+    setVerificationCode(email, code, expires);
 
     // Send email
     await transporter.sendMail({
@@ -85,5 +83,3 @@ export async function POST() {
     return NextResponse.json({ error: 'فشل إرسال الرمز' }, { status: 500 });
   }
 }
-
-export { verificationCodes };
