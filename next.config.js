@@ -9,7 +9,7 @@ const nextConfig = {
     domains: [],
     formats: ['image/avif', 'image/webp'],
   },
-  trailingSlash: true,
+  trailingSlash: false,
   headers: async () => {
     return [
       {

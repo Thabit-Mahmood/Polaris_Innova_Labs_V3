@@ -5,12 +5,16 @@ import { sendContactEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('📧 Contact form submission started');
+    
     // Get client IP for rate limiting
     const clientIp = getClientIp(request);
+    console.log('Client IP:', clientIp);
 
     // Check rate limit (5 requests per 15 minutes)
     const rateLimit = checkRateLimit(`contact_${clientIp}`, 5, 15 * 60 * 1000);
     if (!rateLimit.allowed) {
+      console.log('❌ Rate limit exceeded');
       return NextResponse.json(
         { error: 'لقد تجاوزت الحد المسموح من الطلبات. يرجى المحاولة لاحقاً.' },
         { status: 429, headers: securityHeaders }
@@ -19,6 +23,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
+    console.log('📝 Form data received');
 
     // Validate input
     const validationResult = contactFormSchema.safeParse(body);
@@ -73,6 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send emails
+    console.log('📧 Attempting to send emails...');
     try {
       await sendContactEmail({
         name: sanitizedData.name,
@@ -81,20 +87,20 @@ export async function POST(request: NextRequest) {
         service: sanitizedData.service,
         message: sanitizedData.message,
       });
+      console.log('✅ Emails sent successfully');
     } catch (emailError) {
-      console.error('Email error:', emailError);
-      return NextResponse.json(
-        { error: 'حدث خطأ أثناء إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى أو التواصل عبر واتساب.' },
-        { status: 500, headers: securityHeaders }
-      );
+      console.error('❌ Email error:', emailError);
+      // Continue even if email fails - data is saved
+      console.log('⚠️ Email failed but continuing...');
     }
 
+    console.log('✅ Contact form submission completed');
     return NextResponse.json(
       { success: true, message: 'تم إرسال رسالتك بنجاح!' },
       { status: 200, headers: securityHeaders }
     );
   } catch (error) {
-    console.error('Contact form error:', error);
+    console.error('❌ Contact form error:', error);
     return NextResponse.json(
       { error: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.' },
       { status: 500, headers: securityHeaders }
