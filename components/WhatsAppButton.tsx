@@ -26,7 +26,7 @@ export default function WhatsAppButton() {
 
   const handleClick = () => {
     window.open(
-      `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '966XXXXXXXXX'}?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن خدماتكم')}`,
+      `https://wa.me/966540768136?text=${encodeURIComponent('مرحباً، أريد الاستفسار عن خدماتكم')}`,
       '_blank'
     );
   };

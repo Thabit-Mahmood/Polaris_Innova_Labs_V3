@@ -31,12 +31,19 @@ export default function ContactSection() {
     setErrorMessage('');
 
     try {
+      // Clean up empty optional fields
+      const submitData = {
+        ...formData,
+        phone: formData.phone.trim() || undefined,
+        service: formData.service.trim() || undefined,
+      };
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       const data = await response.json();
@@ -52,7 +59,13 @@ export default function ContactSection() {
         });
       } else {
         setSubmitStatus('error');
-        setErrorMessage(data.error || 'حدث خطأ أثناء إرسال الرسالة');
+        // Show detailed validation errors if available
+        if (data.details && data.details.length > 0) {
+          const errorMessages = data.details.map((err: any) => err.message).join(', ');
+          setErrorMessage(errorMessages);
+        } else {
+          setErrorMessage(data.error || 'حدث خطأ أثناء إرسال الرسالة');
+        }
       }
     } catch (error) {
       setSubmitStatus('error');
@@ -88,7 +101,7 @@ export default function ContactSection() {
             {/* WhatsApp */}
             <div className="glass rounded-xl p-6 hover:border-primary/50 transition-all group cursor-pointer">
               <a
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '966XXXXXXXXX'}`}
+                href="https://wa.me/966540768136"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start space-x-4 space-x-reverse"
@@ -124,10 +137,10 @@ export default function ContactSection() {
                     راسلنا عبر البريد الإلكتروني
                   </p>
                   <a
-                    href={`mailto:${process.env.NEXT_PUBLIC_EMAIL || 'info@polarisinnovalabs.com'}`}
+                    href="mailto:services@polaris-innova-labs.com"
                     className="text-primary font-bold font-tajawal hover:underline"
                   >
-                    {process.env.NEXT_PUBLIC_EMAIL || 'info@polarisinnovalabs.com'}
+                    services@polaris-innova-labs.com
                   </a>
                 </div>
               </div>
@@ -147,10 +160,11 @@ export default function ContactSection() {
                     اتصل بنا مباشرة
                   </p>
                   <a
-                    href={`tel:${process.env.NEXT_PUBLIC_PHONE || '+966XXXXXXXXX'}`}
+                    href="tel:+966540768136"
                     className="text-primary font-bold font-tajawal hover:underline"
+                    dir="ltr"
                   >
-                    {process.env.NEXT_PUBLIC_PHONE || '+966 XX XXX XXXX'}
+                    +966 54 076 8136
                   </a>
                 </div>
               </div>

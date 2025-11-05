@@ -31,24 +31,17 @@ export function sanitizeInput(input: string): string {
 // Validate email format
 export const emailSchema = z.string().email('البريد الإلكتروني غير صحيح');
 
-// Validate phone number (Saudi format)
-export const phoneSchema = z.string().regex(
-  /^(009665|9665|\+9665|05|5)(5|0|3|6|4|9|1|8|7)([0-9]{7})$/,
-  'رقم الهاتف غير صحيح'
-).optional();
-
 // Contact form validation schema
 export const contactFormSchema = z.object({
   name: z.string()
     .min(2, 'الاسم يجب أن يكون حرفين على الأقل')
-    .max(100, 'الاسم طويل جداً')
-    .regex(/^[\u0600-\u06FFa-zA-Z\s]+$/, 'الاسم يجب أن يحتوي على حروف فقط'),
+    .max(100, 'الاسم طويل جداً'),
   email: emailSchema,
-  phone: phoneSchema,
-  service: z.string().optional(),
+  phone: z.string().optional().nullable(),
+  service: z.string().optional().nullable(),
   message: z.string()
-    .min(10, 'الرسالة يجب أن تكون 10 أحرف على الأقل')
-    .max(1000, 'الرسالة طويلة جداً'),
+    .min(5, 'الرسالة يجب أن تكون 5 أحرف على الأقل')
+    .max(2000, 'الرسالة طويلة جداً'),
 });
 
 // Newsletter validation schema

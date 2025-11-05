@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validationResult = contactFormSchema.safeParse(body);
     if (!validationResult.success) {
+      console.error('Validation failed:', validationResult.error.errors);
+      console.error('Received data:', body);
       return NextResponse.json(
         { error: 'البيانات المدخلة غير صحيحة', details: validationResult.error.errors },
         { status: 400, headers: securityHeaders }
@@ -54,6 +56,17 @@ export async function POST(request: NextRequest) {
         ip_address: clientIp,
         user_agent: userAgent,
       });
+
+      // Auto-subscribe to newsletter if not already subscribed
+      try {
+        const existing = queries.checkSubscription(sanitizedData.email);
+        if (!existing) {
+          queries.insertNewsletter(sanitizedData.email, clientIp);
+        }
+      } catch (newsletterError) {
+        // Ignore if already subscribed
+        console.log('Newsletter subscription skipped (may already exist)');
+      }
     } catch (dbError) {
       console.error('Database error:', dbError);
       // Continue even if database insert fails

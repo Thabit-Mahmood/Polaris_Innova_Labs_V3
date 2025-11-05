@@ -46,6 +46,23 @@ export function getDatabase() {
         blocked_until DATETIME
       )
     `);
+
+    // Create blogs table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS blogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        slug TEXT UNIQUE NOT NULL,
+        excerpt TEXT NOT NULL,
+        content TEXT NOT NULL,
+        image_url TEXT,
+        author TEXT DEFAULT 'Polaris Innova Labs',
+        published BOOLEAN DEFAULT 0,
+        display_order INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
   }
 
   return db;
@@ -125,5 +142,112 @@ export const queries = {
       WHERE last_attempt < datetime('now', '-1 day')
     `);
     return stmt.run();
+  },
+
+  // Blog queries
+  getAllBlogs: (publishedOnly: boolean = true) => {
+    const db = getDatabase();
+    const query = publishedOnly 
+      ? `SELECT * FROM blogs WHERE published = 1 ORDER BY display_order DESC, created_at DESC`
+      : `SELECT * FROM blogs ORDER BY display_order DESC, created_at DESC`;
+    const stmt = db.prepare(query);
+    return stmt.all();
+  },
+
+  getBlogBySlug: (slug: string) => {
+    const db = getDatabase();
+    const stmt = db.prepare(`SELECT * FROM blogs WHERE slug = ?`);
+    return stmt.get(slug);
+  },
+
+  insertBlog: (data: {
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    image_url?: string;
+    images?: string[];
+    author?: string;
+    published: boolean;
+    display_order?: number;
+  }) => {
+    const db = getDatabase();
+    const stmt = db.prepare(`
+      INSERT INTO blogs (title, slug, excerpt, content, image_url, images, author, published, display_order)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    return stmt.run(
+      data.title,
+      data.slug,
+      data.excerpt,
+      data.content,
+      data.image_url || null,
+      JSON.stringify(data.images || []),
+      data.author || 'Polaris Innova Labs',
+      data.published ? 1 : 0,
+      data.display_order || 0
+    );
+  },
+
+  updateBlog: (id: number, data: {
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    image_url?: string;
+    images?: string[];
+    author?: string;
+    published: boolean;
+    display_order?: number;
+  }) => {
+    const db = getDatabase();
+    const stmt = db.prepare(`
+      UPDATE blogs 
+      SET title = ?, slug = ?, excerpt = ?, content = ?, image_url = ?, images = ?, author = ?, published = ?, display_order = ?, updated_at = datetime('now')
+      WHERE id = ?
+    `);
+    return stmt.run(
+      data.title,
+      data.slug,
+      data.excerpt,
+      data.content,
+      data.image_url || null,
+      JSON.stringify(data.images || []),
+      data.author || 'Polaris Innova Labs',
+      data.published ? 1 : 0,
+      data.display_order || 0,
+      id
+    );
+  },
+
+  updateBlogOrder: (id: number, order: number) => {
+    const db = getDatabase();
+    const stmt = db.prepare(`UPDATE blogs SET display_order = ? WHERE id = ?`);
+    return stmt.run(order, id);
+  },
+
+  deleteBlog: (id: number) => {
+    const db = getDatabase();
+    const stmt = db.prepare(`DELETE FROM blogs WHERE id = ?`);
+    return stmt.run(id);
+  },
+
+  // Newsletter queries
+  getAllSubscribers: () => {
+    const db = getDatabase();
+    const stmt = db.prepare(`SELECT * FROM newsletter ORDER BY subscribed_at DESC`);
+    return stmt.all();
+  },
+
+  unsubscribeNewsletter: (email: string) => {
+    const db = getDatabase();
+    const stmt = db.prepare(`DELETE FROM newsletter WHERE email = ?`);
+    return stmt.run(email);
+  },
+
+  checkSubscription: (email: string) => {
+    const db = getDatabase();
+    const stmt = db.prepare(`SELECT * FROM newsletter WHERE email = ?`);
+    return stmt.get(email);
   }
 };

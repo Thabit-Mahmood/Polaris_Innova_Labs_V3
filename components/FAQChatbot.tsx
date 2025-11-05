@@ -107,7 +107,7 @@ export default function FAQChatbot() {
           {/* Chatbot Interface */}
           <div className="glass rounded-2xl p-6 border-primary/30">
             {/* Chat Messages */}
-            <div className="h-[400px] overflow-y-auto mb-6 space-y-4 scroll-smooth">
+            <div className="h-[300px] overflow-y-auto mb-6 space-y-4 scroll-smooth">
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -158,16 +158,36 @@ export default function FAQChatbot() {
               ))}
             </div>
 
-            {/* Question Tags */}
+            {/* Question Tags - Better Mobile Integration */}
             <div className="pt-4 border-t border-gray-800">
-              <div className="flex flex-wrap gap-2 justify-center">
+              <p className="text-gray-400 text-sm font-tajawal mb-3 text-center">
+                اضغط على أي سؤال للحصول على الإجابة:
+              </p>
+              
+              {/* Mobile: Accordion Style */}
+              <div className="md:hidden space-y-2">
                 {faqs.map((faq) => (
                   <button
                     key={faq.id}
                     onClick={() => handleQuestionClick(faq)}
-                    className="px-3 py-1.5 rounded-full bg-dark-200 text-gray-300 hover:bg-primary hover:text-dark-400 transition-all text-xs font-tajawal border border-primary/20 hover:border-primary"
+                    className="w-full px-4 py-3 rounded-lg bg-dark-200 text-gray-300 hover:bg-primary hover:text-dark-400 transition-all text-sm font-tajawal border border-primary/20 hover:border-primary text-right flex items-center justify-between group"
                   >
-                    {faq.question}
+                    <span className="flex-1">{faq.question}</span>
+                    <span className="text-primary group-hover:text-dark-400 mr-2">◀</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Desktop: 2-Column Grid */}
+              <div className="hidden md:grid grid-cols-2 gap-3">
+                {faqs.map((faq) => (
+                  <button
+                    key={faq.id}
+                    onClick={() => handleQuestionClick(faq)}
+                    className="px-4 py-3 rounded-lg bg-dark-200 text-gray-300 hover:bg-primary hover:text-dark-400 transition-all text-sm font-tajawal border border-primary/20 hover:border-primary text-right flex items-center justify-between group"
+                  >
+                    <span className="flex-1">{faq.question}</span>
+                    <span className="text-primary group-hover:text-dark-400 mr-2">◀</span>
                   </button>
                 ))}
               </div>
@@ -182,7 +202,7 @@ export default function FAQChatbot() {
             <p className="text-lg text-gray-400 font-tajawal mb-8">
               فريقنا جاهز للرد على استفساراتك في أي وقت
             </p>
-            <a href="https://wa.me/966500000000" target="_blank" rel="noopener noreferrer" className="btn-primary inline-block text-lg px-8 py-4">
+            <a href="https://wa.me/966540768136" target="_blank" rel="noopener noreferrer" className="btn-primary inline-block text-lg px-8 py-4">
               تواصل معنا الآن عبر واتساب
             </a>
           </div>

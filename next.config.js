@@ -3,7 +3,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const basePath = isProd ? '/Polaris_Innova_Labs_V3' : '';
 
 const nextConfig = {
-  output: 'export',
+  // Removed 'output: export' to enable server-side features (API routes, dynamic pages)
   basePath: basePath,
   assetPrefix: basePath,
   reactStrictMode: true,

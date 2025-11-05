@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaWhatsapp, FaEnvelope, FaPhone, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { getAssetPath } from '@/lib/basePath';
+import NewsletterSubscribe from './NewsletterSubscribe';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -18,13 +19,20 @@ export default function Footer() {
   const quickLinks = [
     { label: 'الرئيسية', href: '/' },
     { label: 'خدماتنا', href: '/services' },
+    { label: 'المدونة', href: '/blog' },
     { label: 'من نحن', href: '/about' },
+    { label: 'الأسئلة الشائعة', href: '/faq' },
     { label: 'تواصل معنا', href: '/#contact' },
   ];
 
   return (
     <footer className="bg-dark-300 border-t border-primary/10 pt-16">
       <div className="container-custom pb-16">
+        {/* Newsletter Section */}
+        <div className="mb-12 max-w-2xl mx-auto">
+          <NewsletterSubscribe />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Company Info */}
           <div className="space-y-4">
@@ -93,31 +101,31 @@ export default function Footer() {
             <ul className="space-y-4">
               <li>
                 <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '966XXXXXXXXX'}`}
+                  href="https://wa.me/966540768136"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-3 space-x-reverse text-gray-400 hover:text-primary transition-colors group"
                 >
                   <FaWhatsapp className="text-xl group-hover:scale-110 transition-transform" />
-                  <span className="font-tajawal">واتساب</span>
+                  <span className="font-tajawal" dir="ltr">+966 54 076 8136</span>
                 </a>
               </li>
               <li>
                 <a
-                  href={`mailto:${process.env.NEXT_PUBLIC_EMAIL || 'info@polarisinnovalabs.com'}`}
+                  href="mailto:services@polaris-innova-labs.com"
                   className="flex items-center space-x-3 space-x-reverse text-gray-400 hover:text-primary transition-colors group"
                 >
                   <FaEnvelope className="text-xl group-hover:scale-110 transition-transform" />
-                  <span className="font-tajawal">البريد الإلكتروني</span>
+                  <span className="font-tajawal">services@polaris-innova-labs.com</span>
                 </a>
               </li>
               <li>
                 <a
-                  href={`tel:${process.env.NEXT_PUBLIC_PHONE || '+966XXXXXXXXX'}`}
+                  href="tel:+966540768136"
                   className="flex items-center space-x-3 space-x-reverse text-gray-400 hover:text-primary transition-colors group"
                 >
                   <FaPhone className="text-xl group-hover:scale-110 transition-transform" />
-                  <span className="font-tajawal">هاتف</span>
+                  <span className="font-tajawal" dir="ltr">+966 54 076 8136</span>
                 </a>
               </li>
             </ul>
@@ -126,21 +134,27 @@ export default function Footer() {
             <div className="mt-6">
               <div className="flex items-center space-x-4 space-x-reverse">
                 <a
-                  href="#"
+                  href="https://www.linkedin.com/company/polaris-innova-labs/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 bg-dark-200 rounded-full flex items-center justify-center text-gray-400 hover:bg-primary hover:text-dark-400 transition-all hover:scale-110"
                   aria-label="LinkedIn"
                 >
                   <FaLinkedin />
                 </a>
                 <a
-                  href="#"
+                  href="https://x.com/polanov_labs"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 bg-dark-200 rounded-full flex items-center justify-center text-gray-400 hover:bg-primary hover:text-dark-400 transition-all hover:scale-110"
                   aria-label="Twitter"
                 >
                   <FaTwitter />
                 </a>
                 <a
-                  href="#"
+                  href="https://www.instagram.com/polaris_innova_labs/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 bg-dark-200 rounded-full flex items-center justify-center text-gray-400 hover:bg-primary hover:text-dark-400 transition-all hover:scale-110"
                   aria-label="Instagram"
                 >

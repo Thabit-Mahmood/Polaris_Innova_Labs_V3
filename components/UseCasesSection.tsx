@@ -51,23 +51,49 @@ export default function UseCasesSection() {
           </p>
         </div>
 
-        {/* Service Selector - Compact Pills */}
-        <div className="mb-12 flex justify-center">
-          <div className="inline-flex flex-wrap gap-3 justify-center max-w-4xl">
-            {services.map((service, index) => (
-              <button
-                key={index}
-                onClick={() => handleServiceSelect(index)}
-                className={`px-4 py-2 rounded-full font-cairo font-bold transition-all text-sm ${
-                  selectedService === index
-                    ? 'bg-primary text-dark-400 shadow-lg scale-105'
-                    : 'bg-dark-200 text-gray-400 hover:bg-dark-100 hover:text-white'
-                }`}
-              >
-                <span className="ml-1">{service.icon}</span>
-                {service.title}
-              </button>
-            ))}
+        {/* Service Selector */}
+        <div className="mb-12">
+          {/* Mobile: Dropdown Style */}
+          <div className="md:hidden max-w-md mx-auto px-4">
+            <div className="glass rounded-xl p-4 border-primary/30">
+              <label className="text-gray-400 text-sm font-tajawal mb-2 block">اختر نوع المشروع:</label>
+              <div className="relative">
+                <select
+                  value={selectedService}
+                  onChange={(e) => handleServiceSelect(Number(e.target.value))}
+                  className="w-full bg-dark-200 text-white border-2 border-primary/30 rounded-lg px-4 py-3 font-cairo font-bold text-base appearance-none cursor-pointer focus:outline-none focus:border-primary transition-all"
+                >
+                  {services.map((service, index) => (
+                    <option key={index} value={index}>
+                      {service.icon} {service.title}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-primary">
+                  ▼
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop: Original Compact Pills */}
+          <div className="hidden md:flex justify-center px-4">
+            <div className="inline-flex flex-wrap gap-3 justify-center max-w-4xl">
+              {services.map((service, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleServiceSelect(index)}
+                  className={`px-4 py-2 rounded-full font-cairo font-bold transition-all text-sm ${
+                    selectedService === index
+                      ? 'bg-primary text-dark-400 shadow-lg scale-105'
+                      : 'bg-dark-200 text-gray-400 hover:bg-dark-100 hover:text-white'
+                  }`}
+                >
+                  <span className="ml-1">{service.icon}</span>
+                  {service.title}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

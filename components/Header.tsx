@@ -22,7 +22,9 @@ export default function Header() {
   const menuItems = [
     { label: 'الرئيسية', href: '/' },
     { label: 'خدماتنا', href: '/services' },
+    { label: 'المدونة', href: '/blog' },
     { label: 'من نحن', href: '/about' },
+    { label: 'الأسئلة الشائعة', href: '/faq' },
     { label: 'تواصل معنا', href: '/#contact' },
   ];
 
@@ -70,7 +72,7 @@ export default function Header() {
           {/* WhatsApp Button - Desktop */}
           <div className="hidden md:block absolute left-0">
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '966XXXXXXXXX'}`}
+              href="https://wa.me/966540768136"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary flex items-center space-x-2 space-x-reverse"
@@ -106,7 +108,7 @@ export default function Header() {
               ))}
 
               <a
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '966XXXXXXXXX'}`}
+                href="https://wa.me/966540768136"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary flex items-center justify-center space-x-2 space-x-reverse w-full mt-4"
