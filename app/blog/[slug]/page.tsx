@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { FaCalendar, FaUser, FaArrowRight } from 'react-icons/fa';
 
+// Force dynamic rendering to avoid database access during build
+export const dynamic = 'force-dynamic';
+
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const blog = queries.getBlogBySlug(params.slug) as any;
 

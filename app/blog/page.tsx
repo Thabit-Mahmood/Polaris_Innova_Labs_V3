@@ -7,6 +7,9 @@ export const metadata = {
   description: 'اقرأ آخر المقالات والنصائح التقنية حول تطوير المواقع والتطبيقات',
 };
 
+// Force dynamic rendering to avoid database access during build
+export const dynamic = 'force-dynamic';
+
 export default function BlogPage() {
   const blogs = queries.getAllBlogs(true) as any[];
 

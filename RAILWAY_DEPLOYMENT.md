@@ -1,8 +1,15 @@
 # Railway Deployment Guide
 
-## ✅ Build Fixed!
+## ✅ All Build Errors Fixed!
 
-The build errors have been resolved. Your app is now ready to deploy on Railway.
+All build errors have been resolved:
+- ✅ Type errors fixed
+- ✅ Suspense boundary added
+- ✅ Database directory auto-creation
+- ✅ Dynamic rendering for blog pages
+- ✅ Node 20 configured
+
+Your app is now ready to deploy on Railway.
 
 ## Quick Deploy Steps
 
@@ -75,13 +82,16 @@ RATE_LIMIT_WINDOW_MS=900000
 
 ## Database on Railway
 
-Railway uses ephemeral storage, so your SQLite database will reset on each deploy. For production, consider:
+⚠️ **IMPORTANT:** Railway uses ephemeral storage, so your SQLite database will reset on each deploy.
 
-### Option 1: Railway Volume (Recommended)
-1. In Railway Dashboard → Settings
-2. Add a Volume
+### Option 1: Railway Volume (Recommended) ⭐
+1. In Railway Dashboard → Your Service → Settings
+2. Click "Volumes" → "New Volume"
 3. Mount path: `/app/data`
-4. This persists your database across deploys
+4. Click "Add"
+5. Redeploy your service
+
+This persists your database across deploys and restarts.
 
 ### Option 2: External Database
 - Use Railway PostgreSQL addon
