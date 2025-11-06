@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
 
     await writeFile(filepath, buffer);
 
-    // Return full URL for production
-    const imageUrl = `${config.baseUrl}/api/images/${filename}`;
+    // Return URL that will be served by middleware
+    const imageUrl = `/uploads/${filename}`;
 
     return NextResponse.json({
       success: true,
