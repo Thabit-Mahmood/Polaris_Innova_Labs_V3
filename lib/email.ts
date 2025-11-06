@@ -6,10 +6,14 @@ function createTransporter() {
     throw new Error('SMTP credentials not configured');
   }
   
+  // Railway blocks port 587, so we use port 465 with SSL
+  const port = config.smtp.port === 587 ? 465 : config.smtp.port;
+  const secure = port === 465;
+  
   return nodemailer.createTransport({
     host: config.smtp.host,
-    port: config.smtp.port,
-    secure: false,
+    port: port,
+    secure: secure,
     auth: {
       user: config.smtp.user,
       pass: config.smtp.password,
