@@ -1,47 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, readFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import path from 'path';
-import { getVerificationCode, deleteVerificationCode } from '@/lib/verification-codes';
+
+// Import verification codes from request route
+let verificationCodes: Map<string, { code: string; expires: number }>;
+try {
+  const requestModule = require('./request-password-change/route');
+  verificationCodes = requestModule.verificationCodes;
+} catch {
+  verificationCodes = new Map();
+}
 
 export async function POST(request: NextRequest) {
   try {
     const { code, newPassword } = await request.json();
-    const email = 'services@polaris-innova-labs.com';
 
-    const stored = getVerificationCode(email);
-
-    if (!stored) {
-      return NextResponse.json({ error: 'لم يتم طلب رمز تحقق' }, { status: 400 });
+    if (!code || !newPassword) {
+      return NextResponse.json(
+        { error: 'الرمز وكلمة المرور الجديدة مطلوبان' },
+        { status: 400 }
+      );
     }
 
-    if (Date.now() > stored.expires) {
-      deleteVerificationCode(email);
-      return NextResponse.json({ error: 'انتهت صلاحية الرمز' }, { status: 400 });
+    // Verify code
+    const stored = verificationCodes.get('admin');
+    if (!stored) {
+      return NextResponse.json(
+        { error: 'لم يتم طلب تغيير كلمة المرور' },
+        { status: 400 }
+      );
+    }
+
+    if (stored.expires < Date.now()) {
+      verificationCodes.delete('admin');
+      return NextResponse.json(
+        { error: 'انتهت صلاحية الرمز' },
+        { status: 400 }
+      );
     }
 
     if (stored.code !== code) {
-      return NextResponse.json({ error: 'رمز التحقق غير صحيح' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'الرمز غير صحيح' },
+        { status: 400 }
+      );
     }
 
-    // Save new password to .env.local
-    const envPath = path.join(process.cwd(), '.env.local');
-    let envContent = await readFile(envPath, 'utf-8');
-
-    // Update or add ADMIN_PASSWORD
-    if (envContent.includes('ADMIN_PASSWORD=')) {
-      envContent = envContent.replace(/ADMIN_PASSWORD=.*/g, `ADMIN_PASSWORD=${newPassword}`);
-    } else {
-      envContent += `\n\n# Admin Panel\nADMIN_PASSWORD=${newPassword}\n`;
-    }
-
-    await writeFile(envPath, envContent);
+    // Update password in environment (this is a simplified approach)
+    // In production, you'd want to store this in a database or secure storage
+    process.env.ADMIN_PASSWORD = newPassword;
+    process.env.NEXT_PUBLIC_ADMIN_PASSWORD = newPassword;
 
     // Clear verification code
-    deleteVerificationCode(email);
+    verificationCodes.delete('admin');
 
-    return NextResponse.json({ success: true, message: 'تم تغيير كلمة المرور بنجاح' });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error changing password:', error);
-    return NextResponse.json({ error: 'فشل تغيير كلمة المرور' }, { status: 500 });
+    console.error('Password change error:', error);
+    return NextResponse.json(
+      { error: 'فشل تغيير كلمة المرور' },
+      { status: 500 }
+    );
   }
 }

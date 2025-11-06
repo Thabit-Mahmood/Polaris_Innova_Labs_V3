@@ -1,31 +1,35 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { setVerificationCode } from '@/lib/verification-codes';
+import { config } from '@/lib/config';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+// Store verification codes temporarily (in production, use Redis or database)
+const verificationCodes = new Map<string, { code: string; expires: number }>();
 
 export async function POST() {
   try {
-    const email = 'services@polaris-innova-labs.com';
-    
     // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = Date.now() + 15 * 60 * 1000; // 15 minutes
-
-    setVerificationCode(email, code, expires);
+    
+    // Store code with 15 minute expiration
+    verificationCodes.set('admin', {
+      code,
+      expires: Date.now() + 15 * 60 * 1000,
+    });
 
     // Send email
+    const transporter = nodemailer.createTransport({
+      host: config.smtp.host,
+      port: config.smtp.port,
+      secure: false,
+      auth: {
+        user: config.smtp.user,
+        pass: config.smtp.password,
+      },
+    });
+
     await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: email,
+      from: config.smtp.from,
+      to: config.smtp.to.split(',')[0], // Send to first admin email
       subject: 'رمز تغيير كلمة المرور - Polaris Innova Labs',
       html: `
         <!DOCTYPE html>
@@ -33,53 +37,35 @@ export async function POST() {
         <head>
           <meta charset="UTF-8">
           <style>
-            body {
-              font-family: 'Cairo', Arial, sans-serif;
-              background-color: #0a0a0a;
-              padding: 20px;
-              direction: rtl;
-            }
-            .container {
-              background-color: #1a1a1a;
-              border-radius: 10px;
-              padding: 30px;
-              max-width: 600px;
-              margin: 0 auto;
-              color: #ffffff;
-              text-align: center;
-            }
-            .code {
-              font-size: 48px;
-              font-weight: bold;
-              color: #daff00;
-              letter-spacing: 10px;
-              margin: 30px 0;
-              padding: 20px;
-              background-color: #141414;
-              border-radius: 10px;
-            }
-            .warning {
-              color: #ff6b6b;
-              margin-top: 20px;
-            }
+            body { font-family: Arial, sans-serif; direction: rtl; text-align: right; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .code { font-size: 32px; font-weight: bold; color: #daff00; text-align: center; padding: 20px; background: #1a1a1a; border-radius: 10px; margin: 20px 0; }
           </style>
         </head>
         <body>
           <div class="container">
-            <h1>رمز التحقق</h1>
-            <p>استخدم الرمز التالي لتغيير كلمة المرور:</p>
+            <h1>رمز تغيير كلمة المرور</h1>
+            <p>تم طلب تغيير كلمة مرور لوحة التحكم</p>
             <div class="code">${code}</div>
-            <p>الرمز صالح لمدة 15 دقيقة</p>
-            <p class="warning">⚠️ إذا لم تطلب هذا الرمز، تجاهل هذه الرسالة</p>
+            <p>هذا الرمز صالح لمدة 15 دقيقة</p>
+            <p>إذا لم تطلب هذا التغيير، يرجى تجاهل هذه الرسالة</p>
           </div>
         </body>
         </html>
       `,
     });
 
-    return NextResponse.json({ success: true, message: 'تم إرسال رمز التحقق' });
+    transporter.close();
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error sending verification code:', error);
-    return NextResponse.json({ error: 'فشل إرسال الرمز' }, { status: 500 });
+    console.error('Password change request error:', error);
+    return NextResponse.json(
+      { error: 'فشل إرسال الرمز' },
+      { status: 500 }
+    );
   }
 }
+
+// Export the verification codes map for use in change-password route
+export { verificationCodes };

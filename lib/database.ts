@@ -1,9 +1,10 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { config } from './config';
 
-const dataDir = path.join(process.cwd(), 'data');
-const dbPath = path.join(dataDir, 'contacts.db');
+const dataDir = path.dirname(config.dbPath);
+const dbPath = config.dbPath;
 
 let db: Database.Database;
 

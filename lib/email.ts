@@ -1,13 +1,21 @@
 import nodemailer from 'nodemailer';
+import { config } from './config';
 
 function createTransporter() {
+  if (!config.smtp.user || !config.smtp.password) {
+    throw new Error('SMTP credentials not configured');
+  }
+  
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
+    host: config.smtp.host,
+    port: config.smtp.port,
+    secure: false, // Use STARTTLS
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASSWORD,
+      user: config.smtp.user,
+      pass: config.smtp.password,
+    },
+    tls: {
+      rejectUnauthorized: true,
     },
   });
 }
@@ -23,9 +31,9 @@ export async function sendContactEmail(data: {
   
   try {
     // Send notification to admin
-    const adminResult = await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: process.env.SMTP_TO,
+    await transporter.sendMail({
+      from: config.smtp.from,
+      to: config.smtp.to,
       subject: `طلب تواصل جديد من ${data.name}`,
       html: `
         <!DOCTYPE html>
@@ -151,8 +159,8 @@ export async function sendContactEmail(data: {
     });
 
     // Send thank you email to customer
-    const customerResult = await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    await transporter.sendMail({
+      from: config.smtp.from,
       to: data.email,
       subject: 'شكراً لتواصلك مع Polaris Innova Labs',
       html: `
@@ -298,19 +306,18 @@ export async function sendBlogNotification(
   const transporter = createTransporter();
   
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-    const blogUrl = `${baseUrl}/blog/${blog.slug}`;
+    const blogUrl = `${config.baseUrl}/blog/${blog.slug}`;
     
     // Convert relative image URL to absolute URL
     const imageUrl = blog.image_url 
       ? (blog.image_url.startsWith('http') 
           ? blog.image_url 
-          : `${baseUrl}${blog.image_url}`)
+          : `${config.baseUrl}${blog.image_url}`)
       : null;
 
     for (const email of subscribers) {
       await transporter.sendMail({
-        from: process.env.SMTP_FROM,
+        from: config.smtp.from,
         to: email,
         subject: `مقال جديد: ${blog.title} - Polaris Innova Labs`,
         html: `
@@ -426,7 +433,7 @@ export async function sendBlogNotification(
               <div class="footer">
                 <p>© ${new Date().getFullYear()} Polaris Innova Labs</p>
                 <p style="margin-top: 10px; font-size: 12px;">
-                  <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; text-decoration: underline;">
+                  <a href="${config.baseUrl}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; text-decoration: underline;">
                     إلغاء الاشتراك
                   </a>
                 </p>
@@ -452,7 +459,7 @@ export async function sendNewsletterConfirmation(email: string) {
   try {
     console.log('📧 Sending newsletter confirmation to:', email);
     await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+      from: config.smtp.from,
       to: email,
       subject: 'مرحباً بك في نشرتنا الإخبارية - Polaris Innova Labs',
       html: `
@@ -530,7 +537,7 @@ export async function sendNewsletterConfirmation(email: string) {
             <div class="footer">
               <p>© ${new Date().getFullYear()} Polaris Innova Labs</p>
               <p style="margin-top: 10px; font-size: 12px;">
-                <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; text-decoration: underline;">
+                <a href="${config.baseUrl}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #999; text-decoration: underline;">
                   إلغاء الاشتراك
                 </a>
               </p>
