@@ -3,6 +3,9 @@ import { sendEmail } from '@/lib/email-service';
 import { config } from '@/lib/config';
 import { verificationCodes } from '@/lib/verification-codes';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST() {
   try {
     // Generate 6-digit code
