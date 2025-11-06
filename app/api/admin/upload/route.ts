@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    // Use volume-mounted directory for persistent storage
+    const uploadsDir = path.join(process.cwd(), 'data', 'uploads');
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
     }
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filepath, buffer);
 
     // Return full URL for production
-    const imageUrl = `${config.baseUrl}/uploads/${filename}`;
+    const imageUrl = `${config.baseUrl}/api/images/${filename}`;
 
     return NextResponse.json({
       success: true,
@@ -63,7 +63,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'No filename provided' }, { status: 400 });
     }
 
-    const filepath = path.join(process.cwd(), 'public', 'uploads', filename);
+    const filepath = path.join(process.cwd(), 'data', 'uploads', filename);
     await unlink(filepath);
 
     return NextResponse.json({ success: true });

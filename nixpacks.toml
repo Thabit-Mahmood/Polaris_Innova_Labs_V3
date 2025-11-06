@@ -6,8 +6,7 @@ cmds = ['npm ci']
 
 [phases.build]
 cmds = [
-  'mkdir -p data',
-  'mkdir -p public/uploads',
+  'mkdir -p data/uploads',
   'npm run build'
 ]
 
