@@ -41,15 +41,27 @@ export default function AdminPage() {
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const savedPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
-    if (password === savedPassword) {
-      setIsAuthenticated(true);
-      localStorage.setItem('adminAuth', 'true');
-      loadData();
-    } else {
-      alert('كلمة مرور خاطئة');
+    
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsAuthenticated(true);
+        localStorage.setItem('adminAuth', 'true');
+        loadData();
+      } else {
+        alert(data.error || 'كلمة مرور خاطئة');
+      }
+    } catch (error) {
+      alert('حدث خطأ في تسجيل الدخول');
     }
   };
 

@@ -46,15 +46,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update password in environment (this is a simplified approach)
-    // In production, you'd want to store this in a database or secure storage
-    process.env.ADMIN_PASSWORD = newPassword;
-    process.env.NEXT_PUBLIC_ADMIN_PASSWORD = newPassword;
+    // Store new password in database
+    // For now, we'll use a simple file-based approach
+    // In production, use a proper secrets management system
+    const { queries } = await import('@/lib/database');
+    
+    try {
+      // Store in a settings table
+      const db = (await import('@/lib/database')).getDatabase();
+      
+      // Create settings table if it doesn't exist
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS settings (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      
+      // Update or insert password
+      const stmt = db.prepare(`
+        INSERT INTO settings (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = datetime('now')
+      `);
+      stmt.run('admin_password', newPassword, newPassword);
+      
+      // Clear verification code
+      verificationCodes.delete('admin');
 
-    // Clear verification code
-    verificationCodes.delete('admin');
-
-    return NextResponse.json({ success: true });
+      return NextResponse.json({ 
+        success: true,
+        message: 'تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى.'
+      });
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      throw dbError;
+    }
   } catch (error) {
     console.error('Password change error:', error);
     return NextResponse.json(
