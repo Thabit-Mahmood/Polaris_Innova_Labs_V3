@@ -34,14 +34,7 @@ export async function GET() {
       }, { status: 500 });
     }
 
-    const transporter = nodemailer.createTransport({
-      ...config,
-      pool: false,
-      maxConnections: 1,
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 5000,
-    });
+    const transporter = nodemailer.createTransport(config);
 
     // Try to send a test email
     const info = await transporter.sendMail({
