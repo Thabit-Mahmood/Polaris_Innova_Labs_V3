@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { newsletterSchema, sanitizeInput, getClientIp, checkRateLimit, securityHeaders } from '@/lib/security';
-import { queries } from '@/lib/database';
 import { sendNewsletterConfirmation } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
+  const { queries } = await import('@/lib/database');
   try {
     console.log('📧 Newsletter subscription started');
     const clientIp = getClientIp(request);
