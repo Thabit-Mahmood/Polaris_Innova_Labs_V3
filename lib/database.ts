@@ -75,6 +75,7 @@ export function getDatabase() {
           excerpt TEXT NOT NULL,
           content TEXT NOT NULL,
           image_url TEXT,
+          images TEXT,
           author TEXT DEFAULT 'Polaris Innova Labs',
           published BOOLEAN DEFAULT 0,
           display_order INTEGER DEFAULT 0,
@@ -82,6 +83,19 @@ export function getDatabase() {
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
       `);
+      
+      // Migration: Add images column if it doesn't exist
+      try {
+        const tableInfo = db.prepare("PRAGMA table_info(blogs)").all() as any[];
+        const hasImagesColumn = tableInfo.some((col: any) => col.name === 'images');
+        if (!hasImagesColumn) {
+          console.log('Adding images column to blogs table...');
+          db.exec('ALTER TABLE blogs ADD COLUMN images TEXT');
+          console.log('✅ Images column added');
+        }
+      } catch (migrationError) {
+        console.log('Migration check skipped or failed:', migrationError);
+      }
       
       console.log('✅ All tables created successfully');
     } catch (error) {

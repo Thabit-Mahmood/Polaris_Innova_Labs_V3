@@ -61,15 +61,20 @@ export default function AdminPage() {
 
   const loadData = async () => {
     try {
+      console.log('Loading blogs...');
       const blogsRes = await fetch('/api/admin/blogs');
       const blogsData = await blogsRes.json();
+      console.log('Blogs response:', blogsData);
       setBlogs(blogsData.blogs || []);
 
+      console.log('Loading subscribers...');
       const subsRes = await fetch('/api/admin/subscribers');
       const subsData = await subsRes.json();
+      console.log('Subscribers response:', subsData);
       setSubscribers(subsData.subscribers || []);
     } catch (error) {
       console.error('Error loading data:', error);
+      alert('فشل تحميل البيانات: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'));
     }
   };
 
@@ -147,6 +152,7 @@ export default function AdminPage() {
     e.preventDefault();
 
     try {
+      console.log('Saving blog:', blogForm);
       const url = editingBlog ? `/api/admin/blogs/${editingBlog.id}` : '/api/admin/blogs';
       const method = editingBlog ? 'PUT' : 'POST';
 
@@ -155,6 +161,9 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(blogForm),
       });
+
+      const data = await response.json();
+      console.log('Blog save response:', data);
 
       if (response.ok) {
         alert(editingBlog ? 'تم تحديث المقال' : 'تم إضافة المقال');
@@ -173,10 +182,12 @@ export default function AdminPage() {
         });
         loadData();
       } else {
-        alert('حدث خطأ');
+        console.error('Blog save error:', data);
+        alert('حدث خطأ: ' + (data.error || data.details || 'خطأ غير معروف'));
       }
     } catch (error) {
-      alert('حدث خطأ');
+      console.error('Blog save exception:', error);
+      alert('حدث خطأ: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'));
     }
   };
 
