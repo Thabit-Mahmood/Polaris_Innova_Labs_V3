@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { queries } from '@/lib/database';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +14,7 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
+  const { queries } = await import('@/lib/database');
   try {
     console.log('👥 Fetching all subscribers...');
     const subscribers = queries.getAllSubscribers();

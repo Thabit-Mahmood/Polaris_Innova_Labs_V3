@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/database';
 import { config } from '@/lib/config';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
+  const { getDatabase } = await import('@/lib/database');
   try {
     const { password } = await request.json();
 

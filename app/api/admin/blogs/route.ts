@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queries } from '@/lib/database';
 import { sendBlogNotification } from '@/lib/email';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +15,7 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
+  const { queries } = await import('@/lib/database');
   try {
     console.log('📚 Fetching all blogs...');
     const blogs = queries.getAllBlogs(false);
@@ -37,6 +40,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { queries } = await import('@/lib/database');
+  
   try {
     console.log('📝 Creating new blog post...');
     const body = await request.json();

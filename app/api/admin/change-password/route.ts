@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verificationCodes } from '@/lib/verification-codes';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const { code, newPassword } = await request.json();
