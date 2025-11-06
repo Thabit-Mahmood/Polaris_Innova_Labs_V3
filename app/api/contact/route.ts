@@ -79,6 +79,16 @@ export async function POST(request: NextRequest) {
 
     // Send emails
     console.log('📧 Attempting to send emails...');
+    console.log('SMTP Config:', {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      user: process.env.SMTP_USER,
+      hasPassword: !!process.env.SMTP_PASSWORD,
+      from: process.env.SMTP_FROM,
+      to: process.env.SMTP_TO,
+    });
+
+    let emailSent = false;
     try {
       await sendContactEmail({
         name: sanitizedData.name,
@@ -88,15 +98,20 @@ export async function POST(request: NextRequest) {
         message: sanitizedData.message,
       });
       console.log('✅ Emails sent successfully');
+      emailSent = true;
     } catch (emailError) {
       console.error('❌ Email error:', emailError);
-      // Continue even if email fails - data is saved
-      console.log('⚠️ Email failed but continuing...');
+      console.error('❌ Email error details:', emailError instanceof Error ? emailError.message : 'Unknown');
     }
 
     console.log('✅ Contact form submission completed');
     return NextResponse.json(
-      { success: true, message: 'تم إرسال رسالتك بنجاح!' },
+      { 
+        success: true, 
+        message: 'تم إرسال رسالتك بنجاح!',
+        emailSent: emailSent,
+        warning: !emailSent ? 'تم حفظ رسالتك لكن لم يتم إرسال البريد الإلكتروني' : undefined
+      },
       { status: 200, headers: securityHeaders }
     );
   } catch (error) {
