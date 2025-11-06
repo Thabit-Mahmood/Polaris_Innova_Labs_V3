@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { config } from '@/lib/config';
-
-// Store verification codes temporarily (in production, use Redis or database)
-const verificationCodes = new Map<string, { code: string; expires: number }>();
+import { verificationCodes } from '@/lib/verification-codes';
 
 export async function POST() {
   try {
@@ -66,6 +64,3 @@ export async function POST() {
     );
   }
 }
-
-// Export the verification codes map for use in change-password route
-export { verificationCodes };

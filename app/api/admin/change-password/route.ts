@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import path from 'path';
-
-// Import verification codes from request route
-let verificationCodes: Map<string, { code: string; expires: number }>;
-try {
-  const requestModule = require('./request-password-change/route');
-  verificationCodes = requestModule.verificationCodes;
-} catch {
-  verificationCodes = new Map();
-}
+import { verificationCodes } from '@/lib/verification-codes';
 
 export async function POST(request: NextRequest) {
   try {
