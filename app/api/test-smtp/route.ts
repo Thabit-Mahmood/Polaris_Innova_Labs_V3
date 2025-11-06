@@ -34,15 +34,16 @@ export async function GET() {
       }, { status: 500 });
     }
 
-    const transporter = nodemailer.createTransport(config);
-
-    // Verify connection
-    console.log('Verifying SMTP connection...');
-    await transporter.verify();
-    console.log('✅ SMTP connection verified');
+    const transporter = nodemailer.createTransport({
+      ...config,
+      pool: false,
+      maxConnections: 1,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
+    });
 
     // Try to send a test email
-    console.log('Sending test email...');
     const info = await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: process.env.SMTP_TO?.split(',')[0] || process.env.SMTP_USER, // Send to first recipient or self
@@ -64,7 +65,7 @@ export async function GET() {
       `,
     });
 
-    console.log('✅ Test email sent:', info.messageId);
+    transporter.close();
 
     return NextResponse.json({
       success: true,
@@ -79,8 +80,6 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('❌ SMTP test failed:', error);
-    
     return NextResponse.json({
       success: false,
       error: 'SMTP test failed',

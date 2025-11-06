@@ -1,14 +1,6 @@
 import nodemailer from 'nodemailer';
 
 function createTransporter() {
-  console.log('Creating email transporter with config:', {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    user: process.env.SMTP_USER,
-    from: process.env.SMTP_FROM,
-    hasPassword: !!process.env.SMTP_PASSWORD
-  });
-  
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -17,9 +9,11 @@ function createTransporter() {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 5000,
+    pool: false,
+    maxConnections: 1,
   });
 }
 
@@ -33,7 +27,6 @@ export async function sendContactEmail(data: {
   const transporter = createTransporter();
   
   try {
-    console.log('📧 Sending admin notification email...');
     // Send notification to admin
     const adminResult = await transporter.sendMail({
       from: process.env.SMTP_FROM,
@@ -161,9 +154,7 @@ export async function sendContactEmail(data: {
         </html>
       `,
     });
-    console.log('✅ Admin notification sent:', adminResult.messageId);
 
-    console.log('📧 Sending customer thank you email...');
     // Send thank you email to customer
     const customerResult = await transporter.sendMail({
       from: process.env.SMTP_FROM,
@@ -289,14 +280,13 @@ export async function sendContactEmail(data: {
         </html>
       `,
     });
-    console.log('✅ Customer thank you email sent:', customerResult.messageId);
 
-    console.log('✅ All contact emails sent successfully');
+    // Close the transporter connection
+    transporter.close();
+    
     return { success: true };
   } catch (error) {
-    console.error('❌ Email sending error:', error);
-    console.error('Error details:', error instanceof Error ? error.message : 'Unknown');
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+    transporter.close();
     throw error;
   }
 }
@@ -313,7 +303,6 @@ export async function sendBlogNotification(
   const transporter = createTransporter();
   
   try {
-    console.log(`📧 Sending blog notifications to ${subscribers.length} subscribers...`);
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
     const blogUrl = `${baseUrl}/blog/${blog.slug}`;
     
@@ -454,10 +443,11 @@ export async function sendBlogNotification(
       });
     }
 
+    transporter.close();
     return { success: true };
   } catch (error) {
-    console.error('Blog notification error:', error);
-    throw new Error('فشل في إرسال إشعارات المدونة');
+    transporter.close();
+    throw error;
   }
 }
 
@@ -556,9 +546,10 @@ export async function sendNewsletterConfirmation(email: string) {
       `,
     });
 
+    transporter.close();
     return { success: true };
   } catch (error) {
-    console.error('Newsletter email error:', error);
-    throw new Error('فشل في إرسال بريد التأكيد');
+    transporter.close();
+    throw error;
   }
 }
