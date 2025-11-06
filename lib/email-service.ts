@@ -1,8 +1,4 @@
-import { Resend } from 'resend';
 import { config } from './config';
-
-// Initialize Resend (works with Railway)
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface EmailOptions {
   to: string | string[];
@@ -14,6 +10,9 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
     // Use Resend if API key is available (recommended for Railway)
     if (process.env.RESEND_API_KEY) {
+      const { Resend } = await import('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      
       const recipients = Array.isArray(to) ? to : [to];
       
       const { data, error } = await resend.emails.send({

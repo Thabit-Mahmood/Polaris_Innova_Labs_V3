@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queries } from '@/lib/database';
 import { sendBlogNotification } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const { queries } = await import('@/lib/database');
   try {
     const body = await request.json();
     const blogId = parseInt(params.id);
@@ -42,6 +45,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const { queries } = await import('@/lib/database');
+  
   try {
     queries.deleteBlog(parseInt(params.id));
     return NextResponse.json({ success: true });
