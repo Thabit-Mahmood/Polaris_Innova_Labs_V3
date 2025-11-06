@@ -4,6 +4,12 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingDoodles from '@/components/FloatingDoodles'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import { checkEnvironment } from '@/lib/startup-check'
+
+// Check environment on startup
+if (typeof window === 'undefined') {
+  checkEnvironment();
+}
 
 export const metadata: Metadata = {
   title: 'Polaris Innova Labs - شركة تطوير المواقع في السعودية',
