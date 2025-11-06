@@ -1,17 +1,27 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
+function createTransporter() {
+  console.log('Creating email transporter with config:', {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+    from: process.env.SMTP_FROM,
+    hasPassword: !!process.env.SMTP_PASSWORD
+  });
+  
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+  });
+}
 
 export async function sendContactEmail(data: {
   name: string;
@@ -20,9 +30,12 @@ export async function sendContactEmail(data: {
   service?: string;
   message: string;
 }) {
+  const transporter = createTransporter();
+  
   try {
+    console.log('📧 Sending admin notification email...');
     // Send notification to admin
-    await transporter.sendMail({
+    const adminResult = await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: process.env.SMTP_TO,
       subject: `طلب تواصل جديد من ${data.name}`,
@@ -148,9 +161,11 @@ export async function sendContactEmail(data: {
         </html>
       `,
     });
+    console.log('✅ Admin notification sent:', adminResult.messageId);
 
+    console.log('📧 Sending customer thank you email...');
     // Send thank you email to customer
-    await transporter.sendMail({
+    const customerResult = await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: data.email,
       subject: 'شكراً لتواصلك مع Polaris Innova Labs',
@@ -274,11 +289,15 @@ export async function sendContactEmail(data: {
         </html>
       `,
     });
+    console.log('✅ Customer thank you email sent:', customerResult.messageId);
 
+    console.log('✅ All contact emails sent successfully');
     return { success: true };
   } catch (error) {
-    console.error('Email sending error:', error);
-    throw new Error('فشل في إرسال البريد الإلكتروني');
+    console.error('❌ Email sending error:', error);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown');
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+    throw error;
   }
 }
 
@@ -291,7 +310,10 @@ export async function sendBlogNotification(
     image_url?: string;
   }
 ) {
+  const transporter = createTransporter();
+  
   try {
+    console.log(`📧 Sending blog notifications to ${subscribers.length} subscribers...`);
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
     const blogUrl = `${baseUrl}/blog/${blog.slug}`;
     
@@ -440,7 +462,10 @@ export async function sendBlogNotification(
 }
 
 export async function sendNewsletterConfirmation(email: string) {
+  const transporter = createTransporter();
+  
   try {
+    console.log('📧 Sending newsletter confirmation to:', email);
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: email,
