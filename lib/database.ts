@@ -9,67 +9,85 @@ let db: Database.Database;
 
 export function getDatabase() {
   if (!db) {
-    // Create data directory if it doesn't exist
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+    try {
+      console.log('🔧 Initializing database...');
+      console.log('Data directory:', dataDir);
+      console.log('Database path:', dbPath);
+      
+      // Create data directory if it doesn't exist
+      if (!fs.existsSync(dataDir)) {
+        console.log('Creating data directory...');
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      
+      console.log('Opening database...');
+      db = new Database(dbPath);
+      db.pragma('journal_mode = WAL');
+      console.log('✅ Database opened');
+
+      // Create contacts table
+      console.log('Creating contacts table...');
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS contacts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          phone TEXT,
+          service TEXT,
+          message TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          ip_address TEXT,
+          user_agent TEXT
+        )
+      `);
+
+      // Create newsletter table
+      console.log('Creating newsletter table...');
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS newsletter (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          email TEXT UNIQUE NOT NULL,
+          subscribed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          ip_address TEXT
+        )
+      `);
+
+      // Create rate limit table
+      console.log('Creating rate_limits table...');
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS rate_limits (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ip_address TEXT NOT NULL,
+          endpoint TEXT NOT NULL,
+          attempts INTEGER DEFAULT 1,
+          last_attempt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          blocked_until DATETIME
+        )
+      `);
+
+      // Create blogs table
+      console.log('Creating blogs table...');
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS blogs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          slug TEXT UNIQUE NOT NULL,
+          excerpt TEXT NOT NULL,
+          content TEXT NOT NULL,
+          image_url TEXT,
+          author TEXT DEFAULT 'Polaris Innova Labs',
+          published BOOLEAN DEFAULT 0,
+          display_order INTEGER DEFAULT 0,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      
+      console.log('✅ All tables created successfully');
+    } catch (error) {
+      console.error('❌ Database initialization error:', error);
+      throw error;
     }
-    
-    db = new Database(dbPath);
-    db.pragma('journal_mode = WAL');
-
-    // Create contacts table
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS contacts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT,
-        service TEXT,
-        message TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        ip_address TEXT,
-        user_agent TEXT
-      )
-    `);
-
-    // Create newsletter table
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS newsletter (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        subscribed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        ip_address TEXT
-      )
-    `);
-
-    // Create rate limit table
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS rate_limits (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        ip_address TEXT NOT NULL,
-        endpoint TEXT NOT NULL,
-        attempts INTEGER DEFAULT 1,
-        last_attempt DATETIME DEFAULT CURRENT_TIMESTAMP,
-        blocked_until DATETIME
-      )
-    `);
-
-    // Create blogs table
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS blogs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        slug TEXT UNIQUE NOT NULL,
-        excerpt TEXT NOT NULL,
-        content TEXT NOT NULL,
-        image_url TEXT,
-        author TEXT DEFAULT 'Polaris Innova Labs',
-        published BOOLEAN DEFAULT 0,
-        display_order INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
   }
 
   return db;
@@ -109,12 +127,19 @@ export const queries = {
   },
 
   insertNewsletter: (email: string, ip_address?: string) => {
-    const db = getDatabase();
-    const stmt = db.prepare(`
-      INSERT INTO newsletter (email, ip_address)
-      VALUES (?, ?)
-    `);
-    return stmt.run(email, ip_address || null);
+    try {
+      const db = getDatabase();
+      const stmt = db.prepare(`
+        INSERT INTO newsletter (email, ip_address)
+        VALUES (?, ?)
+      `);
+      const result = stmt.run(email, ip_address || null);
+      console.log('✅ Newsletter inserted:', { email, id: result.lastInsertRowid });
+      return result;
+    } catch (error) {
+      console.error('❌ Error inserting newsletter:', error);
+      throw error;
+    }
   },
 
   checkRateLimit: (ip_address: string, endpoint: string) => {
@@ -253,8 +278,15 @@ export const queries = {
   },
 
   checkSubscription: (email: string) => {
-    const db = getDatabase();
-    const stmt = db.prepare(`SELECT * FROM newsletter WHERE email = ?`);
-    return stmt.get(email);
+    try {
+      const db = getDatabase();
+      const stmt = db.prepare(`SELECT * FROM newsletter WHERE email = ?`);
+      const result = stmt.get(email);
+      console.log('Subscription check for', email, ':', result ? 'EXISTS' : 'NOT FOUND');
+      return result;
+    } catch (error) {
+      console.error('❌ Error checking subscription:', error);
+      throw error;
+    }
   }
 };
