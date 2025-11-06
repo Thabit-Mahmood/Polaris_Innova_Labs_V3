@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, unlink, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { config } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,9 +41,12 @@ export async function POST(request: NextRequest) {
 
     await writeFile(filepath, buffer);
 
+    // Return full URL for production
+    const imageUrl = `${config.baseUrl}/uploads/${filename}`;
+
     return NextResponse.json({
       success: true,
-      url: `/uploads/${filename}`,
+      url: imageUrl,
       filename,
     });
   } catch (error) {

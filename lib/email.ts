@@ -9,15 +9,24 @@ function createTransporter() {
   return nodemailer.createTransport({
     host: config.smtp.host,
     port: config.smtp.port,
-    secure: false, // Use STARTTLS
+    secure: false,
     auth: {
       user: config.smtp.user,
       pass: config.smtp.password,
     },
-    tls: {
-      rejectUnauthorized: true,
-    },
+    connectionTimeout: 10000,
+    socketTimeout: 10000,
+    greetingTimeout: 10000,
   });
+}
+
+async function sendEmailWithTimeout(transporter: any, mailOptions: any, timeoutMs: number = 15000) {
+  return Promise.race([
+    transporter.sendMail(mailOptions),
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Email timeout')), timeoutMs)
+    )
+  ]);
 }
 
 export async function sendContactEmail(data: {
@@ -31,7 +40,7 @@ export async function sendContactEmail(data: {
   
   try {
     // Send notification to admin
-    await transporter.sendMail({
+    await sendEmailWithTimeout(transporter, {
       from: config.smtp.from,
       to: config.smtp.to,
       subject: `طلب تواصل جديد من ${data.name}`,
@@ -159,7 +168,7 @@ export async function sendContactEmail(data: {
     });
 
     // Send thank you email to customer
-    await transporter.sendMail({
+    await sendEmailWithTimeout(transporter, {
       from: config.smtp.from,
       to: data.email,
       subject: 'شكراً لتواصلك مع Polaris Innova Labs',
@@ -316,7 +325,7 @@ export async function sendBlogNotification(
       : null;
 
     for (const email of subscribers) {
-      await transporter.sendMail({
+      await sendEmailWithTimeout(transporter, {
         from: config.smtp.from,
         to: email,
         subject: `مقال جديد: ${blog.title} - Polaris Innova Labs`,
@@ -457,8 +466,7 @@ export async function sendNewsletterConfirmation(email: string) {
   const transporter = createTransporter();
   
   try {
-    console.log('📧 Sending newsletter confirmation to:', email);
-    await transporter.sendMail({
+    await sendEmailWithTimeout(transporter, {
       from: config.smtp.from,
       to: email,
       subject: 'مرحباً بك في نشرتنا الإخبارية - Polaris Innova Labs',
