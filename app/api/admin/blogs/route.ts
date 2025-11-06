@@ -2,18 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 import { queries } from '@/lib/database';
 import { sendBlogNotification } from '@/lib/email';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function GET() {
   try {
     console.log('📚 Fetching all blogs...');
     const blogs = queries.getAllBlogs(false);
     console.log(`✅ Found ${blogs.length} blogs`);
-    return NextResponse.json({ blogs });
+    return NextResponse.json({ 
+      blogs,
+      count: blogs.length 
+    }, { 
+      headers: corsHeaders 
+    });
   } catch (error) {
     console.error('❌ Error fetching blogs:', error);
     return NextResponse.json({ 
       error: 'Failed to fetch blogs',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+      details: error instanceof Error ? error.message : 'Unknown error',
+      blogs: []
+    }, { 
+      status: 500,
+      headers: corsHeaders 
+    });
   }
 }
 
@@ -62,7 +81,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return NextResponse.json({ success: true, id: result.lastInsertRowid });
+      return NextResponse.json({ 
+        success: true, 
+        id: result.lastInsertRowid,
+        message: 'تم إنشاء المقال بنجاح'
+      }, { 
+        headers: corsHeaders 
+      });
     } catch (dbError) {
       console.error('❌ Database error:', dbError);
       throw dbError;
@@ -71,9 +96,13 @@ export async function POST(request: NextRequest) {
     console.error('❌ Blog creation error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json({ 
+      success: false,
       error: 'فشل في إنشاء المقال', 
       details: error instanceof Error ? error.message : 'خطأ غير معروف',
       stack: error instanceof Error ? error.stack : undefined
-    }, { status: 500 });
+    }, { 
+      status: 500,
+      headers: corsHeaders 
+    });
   }
 }

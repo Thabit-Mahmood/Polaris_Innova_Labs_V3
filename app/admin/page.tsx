@@ -62,19 +62,49 @@ export default function AdminPage() {
   const loadData = async () => {
     try {
       console.log('Loading blogs...');
-      const blogsRes = await fetch('/api/admin/blogs');
+      const blogsRes = await fetch('/api/admin/blogs', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store'
+      });
+      
+      if (!blogsRes.ok) {
+        console.error('Blogs fetch failed:', blogsRes.status, blogsRes.statusText);
+      }
+      
       const blogsData = await blogsRes.json();
       console.log('Blogs response:', blogsData);
       setBlogs(blogsData.blogs || []);
 
       console.log('Loading subscribers...');
-      const subsRes = await fetch('/api/admin/subscribers');
+      const subsRes = await fetch('/api/admin/subscribers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store'
+      });
+      
+      if (!subsRes.ok) {
+        console.error('Subscribers fetch failed:', subsRes.status, subsRes.statusText);
+      }
+      
       const subsData = await subsRes.json();
       console.log('Subscribers response:', subsData);
+      console.log('Subscribers count:', subsData.subscribers?.length || 0);
       setSubscribers(subsData.subscribers || []);
+      
+      if (subsData.subscribers && subsData.subscribers.length > 0) {
+        console.log('✅ Subscribers loaded successfully:', subsData.subscribers);
+      } else {
+        console.log('⚠️ No subscribers found');
+      }
     } catch (error) {
       console.error('Error loading data:', error);
-      alert('فشل تحميل البيانات: ' + (error instanceof Error ? error.message : 'خطأ غير معروف'));
+      console.error('Error details:', error instanceof Error ? error.stack : 'No stack');
+      // Don't show alert, just log the error
     }
   };
 
@@ -165,7 +195,7 @@ export default function AdminPage() {
       const data = await response.json();
       console.log('Blog save response:', data);
 
-      if (response.ok) {
+      if (response.ok && data.success !== false) {
         alert(editingBlog ? 'تم تحديث المقال' : 'تم إضافة المقال');
         setShowBlogForm(false);
         setEditingBlog(null);
