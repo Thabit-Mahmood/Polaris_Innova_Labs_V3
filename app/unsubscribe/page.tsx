@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Link from 'next/link';
 
-export default function UnsubscribePage() {
+function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -45,9 +45,7 @@ export default function UnsubscribePage() {
   }, [email]);
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 pt-24">
+    <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 pt-24">
         <div className="glass rounded-2xl p-8 max-w-md w-full text-center">
           {status === 'loading' && (
             <>
@@ -80,6 +78,23 @@ export default function UnsubscribePage() {
           )}
         </div>
       </div>
+  );
+}
+
+export default function UnsubscribePage() {
+  return (
+    <>
+      <Header />
+      <Suspense fallback={
+        <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4 pt-24">
+          <div className="glass rounded-2xl p-8 max-w-md w-full text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-white font-tajawal">جاري التحميل...</p>
+          </div>
+        </div>
+      }>
+        <UnsubscribeContent />
+      </Suspense>
     </>
   );
 }
