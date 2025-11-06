@@ -1,86 +1,46 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '@/lib/email-service';
+import { config } from '@/lib/config';
 
 export async function GET() {
   try {
-    console.log('🔍 Testing SMTP configuration...');
+    const testEmail = config.smtp.to.split(',')[0];
     
-    const config = {
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    };
-
-    console.log('SMTP Config:', {
-      host: config.host,
-      port: config.port,
-      user: config.auth.user,
-      hasPassword: !!config.auth.pass,
-    });
-
-    // Check if credentials are set
-    if (!config.auth.user || !config.auth.pass) {
-      return NextResponse.json({
-        success: false,
-        error: 'SMTP credentials not configured',
-        details: {
-          user: config.auth.user ? 'SET' : 'NOT SET',
-          password: config.auth.pass ? 'SET' : 'NOT SET',
-        }
-      }, { status: 500 });
-    }
-
-    const transporter = nodemailer.createTransport(config);
-
-    // Try to send a test email
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: process.env.SMTP_TO?.split(',')[0] || process.env.SMTP_USER, // Send to first recipient or self
+    const result = await sendEmail({
+      to: testEmail,
       subject: 'Test Email from Polaris Innova Labs',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
           <div style="background-color: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #daff00;">✅ SMTP Test Successful!</h1>
+            <h1 style="color: #daff00;">✅ Email Test Successful!</h1>
             <p>This is a test email from your Polaris Innova Labs website.</p>
-            <p>If you received this email, your SMTP configuration is working correctly.</p>
+            <p>If you received this email, your email configuration is working correctly.</p>
             <hr style="border: 1px solid #daff00; margin: 20px 0;">
             <p style="color: #666; font-size: 14px;">
               Sent at: ${new Date().toISOString()}<br>
-              From: ${process.env.SMTP_FROM}<br>
-              Host: ${config.host}:${config.port}
+              Using: ${process.env.RESEND_API_KEY ? 'Resend API' : 'SMTP'}<br>
+              To: ${testEmail}
             </p>
           </div>
         </div>
       `,
     });
 
-    transporter.close();
-
     return NextResponse.json({
       success: true,
-      message: 'SMTP connection successful and test email sent',
+      message: 'Email sent successfully',
       details: {
-        messageId: info.messageId,
-        from: process.env.SMTP_FROM,
-        to: process.env.SMTP_TO?.split(',')[0] || process.env.SMTP_USER,
-        host: config.host,
-        port: config.port,
+        messageId: result.messageId,
+        to: testEmail,
+        service: process.env.RESEND_API_KEY ? 'Resend' : 'SMTP',
       }
     });
 
   } catch (error) {
     return NextResponse.json({
       success: false,
-      error: 'SMTP test failed',
-      details: error instanceof Error ? {
-        message: error.message,
-        code: (error as any).code,
-        command: (error as any).command,
-      } : 'Unknown error'
+      error: 'Email test failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

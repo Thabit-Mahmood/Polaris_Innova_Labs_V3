@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '@/lib/email-service';
 import { config } from '@/lib/config';
 import { verificationCodes } from '@/lib/verification-codes';
 
@@ -15,18 +15,7 @@ export async function POST() {
     });
 
     // Send email
-    const transporter = nodemailer.createTransport({
-      host: config.smtp.host,
-      port: config.smtp.port,
-      secure: false,
-      auth: {
-        user: config.smtp.user,
-        pass: config.smtp.password,
-      },
-    });
-
-    await transporter.sendMail({
-      from: config.smtp.from,
+    await sendEmail({
       to: config.smtp.to.split(',')[0], // Send to first admin email
       subject: 'رمز تغيير كلمة المرور - Polaris Innova Labs',
       html: `
@@ -52,8 +41,6 @@ export async function POST() {
         </html>
       `,
     });
-
-    transporter.close();
 
     return NextResponse.json({ success: true });
   } catch (error) {

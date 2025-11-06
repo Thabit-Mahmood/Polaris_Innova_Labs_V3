@@ -1,37 +1,5 @@
-import nodemailer from 'nodemailer';
+import { sendEmail } from './email-service';
 import { config } from './config';
-
-function createTransporter() {
-  if (!config.smtp.user || !config.smtp.password) {
-    throw new Error('SMTP credentials not configured');
-  }
-  
-  // Railway blocks port 587, so we use port 465 with SSL
-  const port = config.smtp.port === 587 ? 465 : config.smtp.port;
-  const secure = port === 465;
-  
-  return nodemailer.createTransport({
-    host: config.smtp.host,
-    port: port,
-    secure: secure,
-    auth: {
-      user: config.smtp.user,
-      pass: config.smtp.password,
-    },
-    connectionTimeout: 10000,
-    socketTimeout: 10000,
-    greetingTimeout: 10000,
-  });
-}
-
-async function sendEmailWithTimeout(transporter: any, mailOptions: any, timeoutMs: number = 15000) {
-  return Promise.race([
-    transporter.sendMail(mailOptions),
-    new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Email timeout')), timeoutMs)
-    )
-  ]);
-}
 
 export async function sendContactEmail(data: {
   name: string;
@@ -40,13 +8,10 @@ export async function sendContactEmail(data: {
   service?: string;
   message: string;
 }) {
-  const transporter = createTransporter();
-  
   try {
     // Send notification to admin
-    await sendEmailWithTimeout(transporter, {
-      from: config.smtp.from,
-      to: config.smtp.to,
+    await sendEmail({
+      to: config.smtp.to.split(','),
       subject: `طلب تواصل جديد من ${data.name}`,
       html: `
         <!DOCTYPE html>
@@ -172,8 +137,7 @@ export async function sendContactEmail(data: {
     });
 
     // Send thank you email to customer
-    await sendEmailWithTimeout(transporter, {
-      from: config.smtp.from,
+    await sendEmail({
       to: data.email,
       subject: 'شكراً لتواصلك مع Polaris Innova Labs',
       html: `
@@ -296,13 +260,9 @@ export async function sendContactEmail(data: {
         </html>
       `,
     });
-
-    // Close the transporter connection
-    transporter.close();
     
     return { success: true };
   } catch (error) {
-    transporter.close();
     throw error;
   }
 }
@@ -316,8 +276,6 @@ export async function sendBlogNotification(
     image_url?: string;
   }
 ) {
-  const transporter = createTransporter();
-  
   try {
     const blogUrl = `${config.baseUrl}/blog/${blog.slug}`;
     
@@ -329,8 +287,7 @@ export async function sendBlogNotification(
       : null;
 
     for (const email of subscribers) {
-      await sendEmailWithTimeout(transporter, {
-        from: config.smtp.from,
+      await sendEmail({
         to: email,
         subject: `مقال جديد: ${blog.title} - Polaris Innova Labs`,
         html: `
@@ -458,20 +415,15 @@ export async function sendBlogNotification(
       });
     }
 
-    transporter.close();
     return { success: true };
   } catch (error) {
-    transporter.close();
     throw error;
   }
 }
 
 export async function sendNewsletterConfirmation(email: string) {
-  const transporter = createTransporter();
-  
   try {
-    await sendEmailWithTimeout(transporter, {
-      from: config.smtp.from,
+    await sendEmail({
       to: email,
       subject: 'مرحباً بك في نشرتنا الإخبارية - Polaris Innova Labs',
       html: `
@@ -560,10 +512,8 @@ export async function sendNewsletterConfirmation(email: string) {
       `,
     });
 
-    transporter.close();
     return { success: true };
   } catch (error) {
-    transporter.close();
     throw error;
   }
 }
