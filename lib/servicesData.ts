@@ -14,6 +14,26 @@ export interface Service {
 
 export const services: Service[] = [
   {
+    id: 'custom-solutions',
+    title: 'حلول مخصصة',
+    subtitle: 'Custom Solutions',
+    heroText: 'حلول تقنية مصممة خصيصاً لاحتياجات عملك',
+    icon: '⚙️',
+    description: 'حلول برمجية مخصصة تماماً لتلبية احتياجات عملك الفريدة',
+    problem: 'لديك احتياجات خاصة لا تغطيها الحلول الجاهزة؟',
+    solution: 'نصمم ونطور حلول تقنية مخصصة 100٪ تناسب متطلبات عملك بالضبط وتحل تحدياتك الفريدة',
+    features: [
+      'تحليل شامل لاحتياجات عملك',
+      'تصميم وتطوير حلول مخصصة بالكامل',
+      'تكامل مع أنظمتك الحالية',
+      'قابلية التوسع والتطوير المستقبلي',
+      'دعم فني مخصص ومستمر',
+      'تدريب فريقك على النظام الجديد'
+    ],
+    technologies: ['Next.js', 'React', 'Node.js', 'Custom APIs'],
+    color: '#daff00'
+  },
+  {
     id: 'ecommerce',
     title: 'متجر إلكتروني',
     subtitle: 'E-Commerce Store',

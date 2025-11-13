@@ -54,6 +54,8 @@ export default function FAQPage() {
                 فريقنا متاح 24/7 للإجابة على جميع استفساراتك. تواصل معنا الآن وسنرد عليك في أقرب وقت ممكن!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                {/* TEMPORARY HIDE: WhatsApp button */}
+                {/* Uncomment to show WhatsApp button
                 <a
                   href="https://wa.me/966540768136"
                   target="_blank"
@@ -62,9 +64,10 @@ export default function FAQPage() {
                 >
                   تواصل عبر واتساب
                 </a>
+                */}
                 <a
                   href="mailto:services@polaris-innova-labs.com"
-                  className="btn-secondary text-lg px-8 py-4"
+                  className="btn-primary text-lg px-8 py-4"
                 >
                   راسلنا عبر البريد
                 </a>

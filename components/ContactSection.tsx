@@ -1,8 +1,34 @@
 'use client';
 
 import { useState } from 'react';
-import { FaWhatsapp, FaEnvelope, FaPhone, FaPaperPlane, FaCheckCircle } from 'react-icons/fa';
+import { FaEnvelope, FaPaperPlane, FaCheckCircle } from 'react-icons/fa';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { services } from '@/lib/servicesData';
+
+// TEMPORARY HIDE: WhatsApp and Phone contact info
+// To show again, uncomment the imports and sections below
+// import { FaWhatsapp, FaPhone } from 'react-icons/fa';
+
+// Common industry sectors in Saudi Arabia and Gulf region
+const industrySectors = [
+  'التجزئة والتجارة الإلكترونية',
+  'الخدمات المالية والبنوك',
+  'الرعاية الصحية والطب',
+  'التعليم والتدريب',
+  'العقارات والإنشاءات',
+  'الضيافة والسياحة',
+  'النفط والغاز والطاقة',
+  'التصنيع والإنتاج',
+  'النقل واللوجستيات',
+  'التقنية والاتصالات',
+  'الأغذية والمشروبات',
+  'الأزياء والجمال',
+  'الخدمات المهنية والاستشارات',
+  'الإعلام والترفيه',
+  'المنظمات غير الربحية',
+  'أخرى',
+];
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
@@ -10,6 +36,7 @@ export default function ContactSection() {
     email: '',
     phone: '',
     service: '',
+    industrySector: '',
     message: '',
   });
 
@@ -24,18 +51,51 @@ export default function ContactSection() {
     });
   };
 
+  const handlePhoneChange = (value: string | undefined) => {
+    setFormData({
+      ...formData,
+      phone: value || '',
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus('idle');
     setErrorMessage('');
 
+    // Validate that at least email or phone is provided
+    if (!formData.email && !formData.phone) {
+      setSubmitStatus('error');
+      setErrorMessage('يرجى إدخال البريد الإلكتروني أو رقم الهاتف على الأقل');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Clean up empty optional fields
+      // Extract country code and phone number
+      let countryCode = '';
+      let phoneNumber = '';
+      
+      if (formData.phone) {
+        // Phone is in E.164 format (e.g., +966501234567)
+        const match = formData.phone.match(/^(\+\d{1,4})(.*)$/);
+        if (match) {
+          countryCode = match[1];
+          phoneNumber = match[2];
+        } else {
+          phoneNumber = formData.phone;
+        }
+      }
+
       const submitData = {
-        ...formData,
-        phone: formData.phone.trim() || undefined,
+        name: formData.name.trim(),
+        email: formData.email.trim() || undefined,
+        countryCode: countryCode || undefined,
+        phone: phoneNumber || undefined,
         service: formData.service.trim() || undefined,
+        industrySector: formData.industrySector.trim() || undefined,
+        message: formData.message.trim(),
       };
 
       const response = await fetch('/api/contact', {
@@ -55,6 +115,7 @@ export default function ContactSection() {
           email: '',
           phone: '',
           service: '',
+          industrySector: '',
           message: '',
         });
       } else {
@@ -98,7 +159,8 @@ export default function ContactSection() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
           {/* Contact Info - 2 columns */}
           <div className="lg:col-span-2 space-y-6">
-            {/* WhatsApp */}
+            {/* TEMPORARY HIDE: WhatsApp Contact */}
+            {/* Uncomment to show WhatsApp contact info
             <div className="glass rounded-xl p-6 hover:border-primary/50 transition-all group cursor-pointer">
               <a
                 href="https://wa.me/966540768136"
@@ -122,6 +184,7 @@ export default function ContactSection() {
                 </div>
               </a>
             </div>
+            */}
 
             {/* Email */}
             <div className="glass rounded-xl p-6 hover:border-primary/50 transition-all group">
@@ -146,7 +209,8 @@ export default function ContactSection() {
               </div>
             </div>
 
-            {/* Phone */}
+            {/* TEMPORARY HIDE: Phone Contact */}
+            {/* Uncomment to show phone contact info
             <div className="glass rounded-xl p-6 hover:border-primary/50 transition-all group">
               <div className="flex items-start space-x-4 space-x-reverse">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl group-hover:bg-primary group-hover:text-dark-400 transition-all">
@@ -169,6 +233,7 @@ export default function ContactSection() {
                 </div>
               </div>
             </div>
+            */}
 
             {/* Trust Badge */}
             <div className="glass rounded-xl p-6 bg-primary/5 border-primary/30">
@@ -211,6 +276,8 @@ export default function ContactSection() {
                       value={formData.name}
                       onChange={handleChange}
                       required
+                      minLength={2}
+                      maxLength={100}
                       className="w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal"
                       placeholder="اسمك الكامل"
                     />
@@ -220,7 +287,7 @@ export default function ContactSection() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="email" className="block text-white font-cairo font-bold mb-2">
-                        البريد الإلكتروني <span className="text-primary">*</span>
+                        البريد الإلكتروني
                       </label>
                       <input
                         type="email"
@@ -228,7 +295,6 @@ export default function ContactSection() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
                         className="w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal"
                         placeholder="email@example.com"
                       />
@@ -238,37 +304,65 @@ export default function ContactSection() {
                       <label htmlFor="phone" className="block text-white font-cairo font-bold mb-2">
                         رقم الهاتف
                       </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
+                      <PhoneInput
+                        international
+                        defaultCountry="SA"
                         value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal"
-                        placeholder="05XXXXXXXX"
+                        onChange={handlePhoneChange}
+                        className="phone-input-custom"
+                        placeholder="أدخل رقم الهاتف"
+                        numberInputProps={{
+                          className: 'w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal'
+                        }}
                       />
                     </div>
                   </div>
 
-                  {/* Service Selection */}
-                  <div>
-                    <label htmlFor="service" className="block text-white font-cairo font-bold mb-2">
-                      نوع الخدمة المطلوبة
-                    </label>
-                    <select
-                      id="service"
-                      name="service"
-                      value={formData.service}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal"
-                    >
-                      <option value="">اختر نوع الخدمة</option>
-                      {services.map((service) => (
-                        <option key={service.id} value={service.title}>
-                          {service.icon} {service.title}
-                        </option>
-                      ))}
-                    </select>
+                  <p className="text-sm text-gray-500 font-tajawal -mt-3">
+                    * يرجى إدخال البريد الإلكتروني أو رقم الهاتف على الأقل
+                  </p>
+
+                  {/* Service Selection & Industry Sector */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="service" className="block text-white font-cairo font-bold mb-2">
+                        نوع الخدمة المطلوبة
+                      </label>
+                      <select
+                        id="service"
+                        name="service"
+                        value={formData.service}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal max-h-48 overflow-y-auto"
+                      >
+                        <option value="">اختر نوع الخدمة</option>
+                        {services.map((service) => (
+                          <option key={service.id} value={service.title}>
+                            {service.icon} {service.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="industrySector" className="block text-white font-cairo font-bold mb-2">
+                        القطاع الصناعي
+                      </label>
+                      <select
+                        id="industrySector"
+                        name="industrySector"
+                        value={formData.industrySector}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal max-h-48 overflow-y-auto"
+                      >
+                        <option value="">اختر القطاع الصناعي</option>
+                        {industrySectors.map((sector, index) => (
+                          <option key={index} value={sector}>
+                            {sector}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   {/* Message */}
@@ -282,6 +376,8 @@ export default function ContactSection() {
                       value={formData.message}
                       onChange={handleChange}
                       required
+                      minLength={5}
+                      maxLength={2000}
                       rows={5}
                       className="w-full px-4 py-3 rounded-lg bg-dark-200 text-white border border-gray-700 focus:border-primary focus:outline-none font-tajawal resize-none"
                       placeholder="أخبرنا عن مشروعك وأهدافك..."
@@ -323,6 +419,82 @@ export default function ContactSection() {
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        .phone-input-custom {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .phone-input-custom .PhoneInputCountry {
+          padding: 0.75rem;
+          background-color: #1a1a1a;
+          border: 1px solid #374151;
+          border-radius: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .phone-input-custom .PhoneInputCountry:hover {
+          border-color: #daff00;
+        }
+
+        .phone-input-custom .PhoneInputCountryIcon {
+          width: 1.5rem;
+          height: 1.5rem;
+          border-radius: 0.25rem;
+          overflow: hidden;
+        }
+
+        .phone-input-custom .PhoneInputCountryIcon img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .phone-input-custom .PhoneInputCountrySelect {
+          position: absolute;
+          opacity: 0;
+          cursor: pointer;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+        }
+
+        .phone-input-custom .PhoneInputCountrySelectArrow {
+          color: #9ca3af;
+          margin-left: 0.25rem;
+          font-size: 0.75rem;
+        }
+
+        .phone-input-custom input {
+          flex: 1;
+        }
+
+        .phone-input-custom .PhoneInputInput {
+          background-color: #1a1a1a !important;
+          color: white !important;
+          border: 1px solid #374151 !important;
+          border-radius: 0.5rem !important;
+          padding: 0.75rem 1rem !important;
+          font-family: 'Tajawal', sans-serif !important;
+          width: 100% !important;
+        }
+
+        .phone-input-custom .PhoneInputInput:focus {
+          border-color: #daff00 !important;
+          outline: none !important;
+        }
+
+        .phone-input-custom .PhoneInputInput::placeholder {
+          color: #6b7280;
+        }
+      `}</style>
     </section>
   );
 }

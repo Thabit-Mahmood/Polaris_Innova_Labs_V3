@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaWhatsapp, FaEnvelope, FaPhone, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { FaEnvelope, FaLinkedin, FaTwitter, FaInstagram } from 'react-icons/fa';
+// TEMPORARY HIDE: WhatsApp and Phone icons
+// import { FaWhatsapp, FaPhone } from 'react-icons/fa';
 import { getAssetPath } from '@/lib/basePath';
 import NewsletterSubscribe from './NewsletterSubscribe';
 
@@ -99,6 +101,8 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold text-white mb-6 font-cairo">تواصل معنا</h3>
             <ul className="space-y-4">
+              {/* TEMPORARY HIDE: WhatsApp Contact */}
+              {/* Uncomment to show WhatsApp contact
               <li>
                 <a
                   href="https://wa.me/966540768136"
@@ -110,6 +114,7 @@ export default function Footer() {
                   <span className="font-tajawal" dir="ltr">+966 54 076 8136</span>
                 </a>
               </li>
+              */}
               <li>
                 <a
                   href="mailto:services@polaris-innova-labs.com"
@@ -119,6 +124,8 @@ export default function Footer() {
                   <span className="font-tajawal">services@polaris-innova-labs.com</span>
                 </a>
               </li>
+              {/* TEMPORARY HIDE: Phone Contact */}
+              {/* Uncomment to show phone contact
               <li>
                 <a
                   href="tel:+966540768136"
@@ -128,6 +135,7 @@ export default function Footer() {
                   <span className="font-tajawal" dir="ltr">+966 54 076 8136</span>
                 </a>
               </li>
+              */}
             </ul>
 
             {/* Social Media */}

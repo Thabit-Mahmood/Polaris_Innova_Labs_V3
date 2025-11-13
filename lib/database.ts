@@ -32,15 +32,59 @@ export function getDatabase() {
         CREATE TABLE IF NOT EXISTS contacts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
-          email TEXT NOT NULL,
+          email TEXT,
+          country_code TEXT,
           phone TEXT,
           service TEXT,
+          industry_sector TEXT,
           message TEXT NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           ip_address TEXT,
           user_agent TEXT
         )
       `);
+      
+      // Migration: Add new columns if they don't exist
+      try {
+        const tableInfo = db.prepare("PRAGMA table_info(contacts)").all() as any[];
+        const hasCountryCode = tableInfo.some((col: any) => col.name === 'country_code');
+        const hasIndustrySector = tableInfo.some((col: any) => col.name === 'industry_sector');
+        
+        if (!hasCountryCode) {
+          console.log('Adding country_code column to contacts table...');
+          db.exec('ALTER TABLE contacts ADD COLUMN country_code TEXT');
+        }
+        if (!hasIndustrySector) {
+          console.log('Adding industry_sector column to contacts table...');
+          db.exec('ALTER TABLE contacts ADD COLUMN industry_sector TEXT');
+        }
+        
+        // Make email nullable if it's not already
+        const emailColumn = tableInfo.find((col: any) => col.name === 'email');
+        if (emailColumn && emailColumn.notnull === 1) {
+          console.log('Email column migration: Creating new table with nullable email...');
+          db.exec(`
+            CREATE TABLE contacts_new (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              email TEXT,
+              country_code TEXT,
+              phone TEXT,
+              service TEXT,
+              industry_sector TEXT,
+              message TEXT NOT NULL,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              ip_address TEXT,
+              user_agent TEXT
+            );
+            INSERT INTO contacts_new SELECT id, name, email, country_code, phone, service, industry_sector, message, created_at, ip_address, user_agent FROM contacts;
+            DROP TABLE contacts;
+            ALTER TABLE contacts_new RENAME TO contacts;
+          `);
+        }
+      } catch (migrationError) {
+        console.log('Migration check skipped or failed:', migrationError);
+      }
 
       // Create newsletter table
       console.log('Creating newsletter table...');
@@ -118,23 +162,27 @@ export function closeDatabase() {
 export const queries = {
   insertContact: (data: {
     name: string;
-    email: string;
+    email?: string;
+    countryCode?: string;
     phone?: string;
     service?: string;
+    industrySector?: string;
     message: string;
     ip_address?: string;
     user_agent?: string;
   }) => {
     const db = getDatabase();
     const stmt = db.prepare(`
-      INSERT INTO contacts (name, email, phone, service, message, ip_address, user_agent)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO contacts (name, email, country_code, phone, service, industry_sector, message, ip_address, user_agent)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     return stmt.run(
       data.name,
-      data.email,
+      data.email || null,
+      data.countryCode || null,
       data.phone || null,
       data.service || null,
+      data.industrySector || null,
       data.message,
       data.ip_address || null,
       data.user_agent || null

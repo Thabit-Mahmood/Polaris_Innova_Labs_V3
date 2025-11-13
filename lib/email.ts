@@ -3,9 +3,11 @@ import { config } from './config';
 
 export async function sendContactEmail(data: {
   name: string;
-  email: string;
+  email?: string;
+  countryCode?: string;
   phone?: string;
   service?: string;
+  industrySector?: string;
   message: string;
 }) {
   try {
@@ -103,15 +105,17 @@ export async function sendContactEmail(data: {
               <span class="value">${data.name}</span>
             </div>
 
+            ${data.email ? `
             <div class="field">
               <span class="label">البريد الإلكتروني:</span>
               <span class="value">${data.email}</span>
             </div>
+            ` : ''}
 
             ${data.phone ? `
             <div class="field">
               <span class="label">رقم الهاتف:</span>
-              <span class="value">${data.phone}</span>
+              <span class="value">${data.countryCode || ''} ${data.phone}</span>
             </div>
             ` : ''}
 
@@ -119,6 +123,13 @@ export async function sendContactEmail(data: {
             <div class="field">
               <span class="label">نوع الخدمة:</span>
               <span class="value">${data.service}</span>
+            </div>
+            ` : ''}
+
+            ${data.industrySector ? `
+            <div class="field">
+              <span class="label">القطاع الصناعي:</span>
+              <span class="value">${data.industrySector}</span>
             </div>
             ` : ''}
 
@@ -136,10 +147,11 @@ export async function sendContactEmail(data: {
       `,
     });
 
-    // Send thank you email to customer
-    await sendEmail({
-      to: data.email,
-      subject: 'شكراً لتواصلك مع Polaris Innova Labs',
+    // Send thank you email to customer (only if email is provided)
+    if (data.email) {
+      await sendEmail({
+        to: data.email,
+        subject: 'شكراً لتواصلك مع Polaris Innova Labs',
       html: `
         <!DOCTYPE html>
         <html dir="rtl" lang="ar">
@@ -247,10 +259,6 @@ export async function sendContactEmail(data: {
               </p>
             </div>
 
-            <div class="cta">
-              <a href="https://wa.me/966540768136">تواصل معنا عبر واتساب</a>
-            </div>
-
             <div class="footer">
               <p>Polaris Innova Labs - شركة تطوير المواقع في السعودية</p>
               <p>© ${new Date().getFullYear()} جميع الحقوق محفوظة</p>
@@ -259,7 +267,8 @@ export async function sendContactEmail(data: {
         </body>
         </html>
       `,
-    });
+      });
+    }
     
     return { success: true };
   } catch (error) {

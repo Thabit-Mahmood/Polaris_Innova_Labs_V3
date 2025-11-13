@@ -36,9 +36,11 @@ export const contactFormSchema = z.object({
   name: z.string()
     .min(2, 'الاسم يجب أن يكون حرفين على الأقل')
     .max(100, 'الاسم طويل جداً'),
-  email: emailSchema,
+  email: z.string().email('البريد الإلكتروني غير صحيح').optional().or(z.literal('')),
+  countryCode: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
   service: z.string().optional().nullable(),
+  industrySector: z.string().optional().nullable(),
   message: z.string()
     .min(5, 'الرسالة يجب أن تكون 5 أحرف على الأقل')
     .max(2000, 'الرسالة طويلة جداً'),

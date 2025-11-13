@@ -197,13 +197,19 @@ export default function FAQChatbot() {
           {/* Contact CTA - Wider */}
           <div className="mt-12 glass rounded-2xl p-12 text-center border-primary/20 max-w-4xl mx-auto">
             <p className="text-3xl text-white font-cairo font-bold mb-6">
-              هل لديك أسئلة؟ تواصل معنا عبر واتساب! 👋
+              هل لديك أسئلة؟ تواصل معنا! 👋
             </p>
             <p className="text-lg text-gray-400 font-tajawal mb-8">
               فريقنا جاهز للرد على استفساراتك في أي وقت
             </p>
+            {/* TEMPORARY HIDE: WhatsApp button */}
+            {/* Uncomment to show WhatsApp button
             <a href="https://wa.me/966540768136" target="_blank" rel="noopener noreferrer" className="btn-primary inline-block text-lg px-8 py-4">
               تواصل معنا الآن عبر واتساب
+            </a>
+            */}
+            <a href="mailto:services@polaris-innova-labs.com" className="btn-primary inline-block text-lg px-8 py-4">
+              راسلنا عبر البريد الإلكتروني
             </a>
           </div>
         </div>

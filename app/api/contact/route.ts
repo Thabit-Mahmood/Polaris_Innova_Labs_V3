@@ -39,14 +39,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, phone, service, message } = validationResult.data;
+    const { name, email, countryCode, phone, service, industrySector, message } = validationResult.data;
 
     // Sanitize inputs to prevent XSS
     const sanitizedData = {
       name: sanitizeInput(name),
-      email: sanitizeInput(email),
+      email: email ? sanitizeInput(email) : undefined,
+      countryCode: countryCode ? sanitizeInput(countryCode) : undefined,
       phone: phone ? sanitizeInput(phone) : undefined,
       service: service ? sanitizeInput(service) : undefined,
+      industrySector: industrySector ? sanitizeInput(industrySector) : undefined,
       message: sanitizeInput(message),
     };
 
@@ -58,22 +60,26 @@ export async function POST(request: NextRequest) {
       queries.insertContact({
         name: sanitizedData.name,
         email: sanitizedData.email,
+        countryCode: sanitizedData.countryCode,
         phone: sanitizedData.phone,
         service: sanitizedData.service,
+        industrySector: sanitizedData.industrySector,
         message: sanitizedData.message,
         ip_address: clientIp,
         user_agent: userAgent,
       });
 
-      // Auto-subscribe to newsletter if not already subscribed
-      try {
-        const existing = queries.checkSubscription(sanitizedData.email);
-        if (!existing) {
-          queries.insertNewsletter(sanitizedData.email, clientIp);
+      // Auto-subscribe to newsletter if email is provided and not already subscribed
+      if (sanitizedData.email) {
+        try {
+          const existing = queries.checkSubscription(sanitizedData.email);
+          if (!existing) {
+            queries.insertNewsletter(sanitizedData.email, clientIp);
+          }
+        } catch (newsletterError) {
+          // Ignore if already subscribed
+          console.log('Newsletter subscription skipped (may already exist)');
         }
-      } catch (newsletterError) {
-        // Ignore if already subscribed
-        console.log('Newsletter subscription skipped (may already exist)');
       }
     } catch (dbError) {
       console.error('Database error:', dbError);
@@ -96,8 +102,10 @@ export async function POST(request: NextRequest) {
       await sendContactEmail({
         name: sanitizedData.name,
         email: sanitizedData.email,
+        countryCode: sanitizedData.countryCode,
         phone: sanitizedData.phone,
         service: sanitizedData.service,
+        industrySector: sanitizedData.industrySector,
         message: sanitizedData.message,
       });
       console.log('✅ Emails sent successfully');

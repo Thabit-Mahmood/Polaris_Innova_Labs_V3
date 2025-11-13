@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaBars, FaTimes, FaWhatsapp } from 'react-icons/fa';
+import { FaBars, FaTimes } from 'react-icons/fa';
+// TEMPORARY HIDE: WhatsApp button
+// import { FaWhatsapp } from 'react-icons/fa';
 import { getAssetPath } from '@/lib/basePath';
 
 export default function Header() {
@@ -69,7 +71,8 @@ export default function Header() {
             ))}
           </div>
 
-          {/* WhatsApp Button - Desktop */}
+          {/* TEMPORARY HIDE: WhatsApp Button - Desktop */}
+          {/* Uncomment to show WhatsApp button
           <div className="hidden md:block absolute left-0">
             <a
               href="https://wa.me/966540768136"
@@ -81,6 +84,7 @@ export default function Header() {
               <span>واتساب</span>
             </a>
           </div>
+          */}
 
           {/* Mobile Menu Button */}
           <button
@@ -107,6 +111,8 @@ export default function Header() {
                 </Link>
               ))}
 
+              {/* TEMPORARY HIDE: WhatsApp Button - Mobile */}
+              {/* Uncomment to show WhatsApp button
               <a
                 href="https://wa.me/966540768136"
                 target="_blank"
@@ -117,6 +123,7 @@ export default function Header() {
                 <FaWhatsapp className="text-xl" />
                 <span>تواصل عبر واتساب</span>
               </a>
+              */}
             </div>
           </div>
         )}

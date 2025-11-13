@@ -3,7 +3,8 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingDoodles from '@/components/FloatingDoodles'
-import WhatsAppButton from '@/components/WhatsAppButton'
+// TEMPORARY HIDE: WhatsApp floating button
+// import WhatsAppButton from '@/components/WhatsAppButton'
 import { checkEnvironment } from '@/lib/startup-check'
 
 // Check environment on startup
@@ -43,7 +44,8 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body className="font-cairo bg-dark-400 text-white antialiased">
         <FloatingDoodles />
-        <WhatsAppButton />
+        {/* TEMPORARY HIDE: WhatsApp floating button */}
+        {/* <WhatsAppButton /> */}
         <Header />
         <main className="min-h-screen">
           {children}
